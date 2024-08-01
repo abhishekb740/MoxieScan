@@ -2,8 +2,6 @@
 
 import { gql, GraphQLClient } from "graphql-request";
 
-
-
 // Define the queries
 const fetchAuctionsQuery = gql`
   query {
@@ -72,6 +70,7 @@ const getUserNameFromBeneficiary = async (beneficiary: string) => {
       ) {
         Social {
           profileName
+          profileImage
         }
       }}`;
 
@@ -86,7 +85,10 @@ const getUserNameFromBeneficiary = async (beneficiary: string) => {
 
   const { data } = await response.json();
   if (data && data.Socials && data.Socials.Social && data.Socials.Social.length > 0) {
-    return data.Socials.Social[0].profileName;
+    return {
+      profileName: data.Socials.Social[0].profileName,
+      profileImage: data.Socials.Social[0].profileImage
+    };
   } else {
     return null;
   }
@@ -98,11 +100,9 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
   );
 
   try {
-    // Fetch all auctions
     const auctionsData = await graphQLClient.request<{ newAuctions: AllAuction[] }>(fetchAuctionsQuery);
     const auctions = auctionsData.newAuctions;
 
-    // Fetch bids for each auction
     const bidsPromises = auctions.map(async (auction) => {
       const bidsData = await graphQLClient.request<{ orders: Bid[] }>(fetchBidsQuery, { auctionId: auction.auctionId });
       return bidsData.orders.map(bid => ({
@@ -115,17 +115,20 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
     const bidsArray = await Promise.all(bidsPromises);
     const allBids = bidsArray.flat();
 
-    // Sort bids by timestamp and get top 100 latest bids
     const top100Bids = allBids.sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
 
-    // Fetch profile names for top 100 bids
     const bidsWithProfileNames = await Promise.all(top100Bids.map(async (bid) => {
       const beneficiary = await getUserDetails(bid.user.address);
       let profileName = null;
+      let profileImage = null;
       if (beneficiary) {
-        profileName = await getUserNameFromBeneficiary(beneficiary);
+        const userInfo = await getUserNameFromBeneficiary(beneficiary);
+        if (userInfo) {
+          profileName = userInfo.profileName;
+          profileImage = userInfo.profileImage;
+        }
       }
-      return { ...bid, profileName};
+      return { ...bid, profileName, profileImage };
     }));
 
     return bidsWithProfileNames;

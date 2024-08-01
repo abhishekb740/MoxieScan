@@ -1,97 +1,3 @@
-interface UserOrder {
-    price: string;
-    protocolToken: string;
-    protocolTokenAmount: string;
-    protocolFeeTransfer: {
-        txHash: string;
-        amount: string;
-    };
-    subjectToken: {
-        name: string;
-        symbol: string;
-    };
-    subjectAmount: string;
-    subjectFeeTransfer: {
-        txHash: string;
-        amount: string;
-    };
-}
-
-interface Token {
-    address: string;
-    name?: string;
-    symbol?: string;
-}
-
-interface FanToken {
-    buySideVolume: string;
-    currentPriceInMoxie: string;
-    currentPriceInWeiInMoxie: string;
-    address: string;
-    name: string;
-    symbol: string;
-    decimals: number;
-    createdAtBlockInfo: {
-        id: string;
-    };
-}
-
-interface BlockInfo {
-    blockNumber: number;
-    hash: string;
-    timestamp: number;
-}
-
-interface Token {
-    address: string;
-    name?: string;
-    symbol?: string;
-}
-
-interface User {
-    address: string;
-}
-
-interface Order {
-    blockInfo: BlockInfo;
-    orderType: string;
-    price: string;
-    protocolToken: string;
-    protocolTokenAmount: string;
-    subjectAmount: string;
-    subjectToken: Token;
-    user: User;
-}
-
-interface Portfolio {
-    balance: string;
-    buyVolume: string;
-    sellVolume: string;
-    subjectToken: Token;
-}
-
-interface UserWithPortfolio {
-    address: string;
-    portfolio: Portfolio[];
-}
-
-// interface Auction {
-//     auctionId: string;
-//     auctionSupply: string;
-//     decimals: number;
-//     entityId: string;
-//     entityName: string;
-//     entitySymbol: string;
-//     entityType: string;
-//     estimatedEndTimestamp: number;
-//     estimatedStartTimestamp: number;
-//     launchCastUrl: string;
-//     minBiddingAmount: string;
-//     minFundingAmount: string;
-//     minPriceInMoxie: string;
-//     subjectAddress: string;
-// }
-
 interface AllAuction {
     allowListContract: string;
     allowListData: string;
@@ -145,6 +51,7 @@ interface Bid {
     auctioningToken?: string;
     auctionId?: string;
     profileName?: string | null;
+    profileImage?: string | null;
 }
 
 interface TokenLockWallet {
