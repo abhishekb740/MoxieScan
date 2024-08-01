@@ -160,7 +160,63 @@ const getFanAuctionTokenDetails = async (addresses: string[]) => {
 }
 
 const getUserFidDetails = async (fid: string) => {
-  
+  const query = `query MyQuery {
+  Socials(input: {filter: {userId: {_eq: "${fid}"}}, blockchain: ethereum}) {
+    Social {
+      profileName
+      profileImage
+    }
+  }
+}`;
+
+  const response = await fetch("https://api.airstack.xyz/gql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: process.env.AIRSTACK_API_KEY!,
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  const { data } = await response.json();
+  if (data && data.Socials && data.Socials.Social && data.Socials.Social.length > 0) {
+    console.log(data.Socials.Social[0]);
+    return data.Socials.Social[0];
+  } else {
+    return null;
+  }
 }
 
-getFanAuctionTokenDetails(["0x3a2281e71dc0aabecfa8045959cf3020f2a562e6", "0x0f111d81573000a3e4df7f5d3da8d335abe9e806"]);
+const getChannelCidDetails = async (cid: string) => {
+  const query = `query MyQuery {
+    FarcasterChannels(
+      input: {blockchain: ALL, filter: {channelId: {_eq: "${cid}"}}}
+    ) {
+      FarcasterChannel {
+        name
+        imageUrl
+      }
+    }
+  }`
+
+  const response = await fetch("https://api.airstack.xyz/gql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: process.env.AIRSTACK_API_KEY!,
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  const { data } = await response.json();
+  if (data && data.FarcasterChannels && data.FarcasterChannels.FarcasterChannel && data.FarcasterChannels.FarcasterChannel.length > 0) {
+    console.log(data.FarcasterChannels.FarcasterChannel[0]);
+    return data.FarcasterChannels.FarcasterChannel[0];
+  } else {
+    return null;
+  }
+}
+
+// getChannelCidDetails("airstack");
+// getUserFidDetails("500605")
+// getFanAuctionTokenDetails(["0x3a2281e71dc0aabecfa8045959cf3020f2a562e6", "0x0f111d81573000a3e4df7f5d3da8d335abe9e806"]);
