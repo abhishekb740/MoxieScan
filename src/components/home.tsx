@@ -11,17 +11,19 @@ const Hero = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalBids, setTotalBids] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getBids = async () => {
       try {
         const data = await fetchAuctionsWithBids();
-        console.log(data);
         setBids(data);
         setTotalBids(data.length);
+        setLoading(false);
       } catch (e) {
         console.error("Failed to fetch bids", e);
         setError("Failed to fetch bids");
+        setLoading(false);
       }
     };
 
@@ -34,11 +36,20 @@ const Hero = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+    console.log(`Page changed to: ${newPage}`);
   };
 
   const paginatedBids = bids.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
+  );
+
+  console.log(`Paginated Bids for page ${currentPage}:`, paginatedBids);
+
+  if (loading) return (
+    <div className="flex bg-opacity-50 z-50 justify-center items-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
   );
 
   return (
