@@ -36,15 +36,12 @@ const Hero = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    console.log(`Page changed to: ${newPage}`);
   };
 
   const paginatedBids = bids.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
-
-  console.log(`Paginated Bids for page ${currentPage}:`, paginatedBids);
 
   if (loading) return (
     <div className="flex bg-opacity-50 z-50 justify-center items-center">
@@ -70,7 +67,9 @@ const Hero = () => {
               <tr key={bid.encodedOrderId}>
                 <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center" style={index === paginatedBids.length - 1 ? { borderBottomLeftRadius: '0.75rem' } : {}}>
                   <div>
-                    <img className='w-8 h-8 rounded-full' src={bid.profileImage ?? ''} alt="profile Image" />
+                    {bid.profileImage ? <img className='w-8 h-8 rounded-full' src={bid.profileImage ?? ''} alt="profile Image" /> :
+                      <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
+                    }
                   </div>
                   {bid.profileName === null ? bid.user.address.slice(0, 5) + "..." + bid.user.address.slice(bid.user.address.length - 4, bid.user.address.length) : bid.profileName}
                 </td>
@@ -80,7 +79,12 @@ const Hero = () => {
                     bided on
                   </div>
                   <div>
-                    <img className='w-8 h-8 rounded-full' src={bid.tokenProfileImage ?? ''} alt="token profile Image" />
+                    {
+                      bid.tokenProfileImage ?
+                        <img className='w-8 h-8 rounded-full' src={bid.tokenProfileImage ?? ''} alt="token profile Image" />
+                        :
+                        <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
+                    }
                   </div>
                   {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
                 </td>
