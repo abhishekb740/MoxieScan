@@ -57,7 +57,7 @@ const Hero = () => {
           <tbody className="bg-black divide-y divide-gray-700">
             {paginatedBids.map((bid, index) => (
               <tr key={bid.encodedOrderId}>
-                <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2" style={index === paginatedBids.length - 1 ? { borderBottomLeftRadius: '0.75rem' } : {}}>
+                <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center" style={index === paginatedBids.length - 1 ? { borderBottomLeftRadius: '0.75rem' } : {}}>
                   <div>
                     <img className='w-8 h-8 rounded-full' src={bid.profileImage ?? ''} alt="profile Image" />
                   </div>

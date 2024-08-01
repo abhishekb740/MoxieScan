@@ -1,5 +1,6 @@
 "use server";
 
+import { graphql } from "graphql";
 import { gql, GraphQLClient } from "graphql-request";
 
 // Define the queries
@@ -32,6 +33,8 @@ const fetchBidsQuery = gql`
     }
   }
 `;
+
+
 
 export const getUserDetails = async (address: string) => {
   const graphQLClient = new GraphQLClient(
@@ -136,3 +139,28 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
     throw new Error(`fetchAuctionsWithBids: ${(e as Error).message}`);
   }
 };
+
+const getFanAuctionTokenDetails = async (addresses: string[]) => {
+  const graphQLClient = new GraphQLClient(
+    "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
+  );
+
+  const query = `
+  query MyQuery($addresses: [ID!]) {
+    tokens(where: {id_in: $addresses}) {
+      symbol
+      id
+    }
+  }`
+  const variables = {
+    addresses
+  }
+  const data = await graphQLClient.request(query, variables);
+  console.log(data);
+}
+
+const getUserFidDetails = async (fid: string) => {
+  
+}
+
+getFanAuctionTokenDetails(["0x3a2281e71dc0aabecfa8045959cf3020f2a562e6", "0x0f111d81573000a3e4df7f5d3da8d335abe9e806"]);
