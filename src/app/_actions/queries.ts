@@ -120,7 +120,49 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
 
     const top100Bids = allBids.sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
 
-    const bidsWithProfileNames = await Promise.all(top100Bids.map(async (bid) => {
+    const auctioningTokenAddresses = top100Bids.map(bid => bid.auctioningToken);
+    let tokenDetails: { id: string, symbol: string }[] = [];
+    try {
+      tokenDetails = await getFanAuctionTokenDetails(auctioningTokenAddresses);
+    } catch (e) {
+      console.error(`Error fetching token details: ${(e as Error).message}`);
+    }
+
+    const bidsWithDetails = await Promise.all(top100Bids.map(async (bid) => {
+      const tokenDetail = tokenDetails.find(token => token.id === bid.auctioningToken);
+      if (!tokenDetail) return { ...bid, tokenProfileName: null, tokenProfileImage: null };
+
+      let tokenProfileName = tokenDetail.symbol;
+      let tokenProfileImage = null;
+
+      if (tokenDetail.symbol.startsWith('cid:')) {
+        const cid = tokenDetail.symbol.replace('cid:', '');
+        try {
+          const channelDetail = await getChannelCidDetails(cid);
+          if (channelDetail) {
+            tokenProfileName = channelDetail.name;
+            tokenProfileImage = channelDetail.imageUrl;
+          }
+        } catch (e) {
+          console.error(`Error fetching channel details for cid ${cid}: ${(e as Error).message}`);
+        }
+      } else if (tokenDetail.symbol.startsWith('fid:')) {
+        const fid = tokenDetail.symbol.replace('fid:', '');
+        try {
+          const userDetail = await getUserFidDetails(fid);
+          if (userDetail) {
+            tokenProfileName = userDetail.profileName;
+            tokenProfileImage = userDetail.profileImage;
+          }
+        } catch (e) {
+          console.error(`Error fetching user details for fid ${fid}: ${(e as Error).message}`);
+        }
+      }
+
+      return { ...bid, tokenProfileName, tokenProfileImage };
+    }));
+
+    const bidsWithProfileNames = await Promise.all(bidsWithDetails.map(async (bid) => {
       const beneficiary = await getUserDetails(bid.user.address);
       let profileName = null;
       let profileImage = null;
@@ -140,24 +182,32 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
   }
 };
 
-const getFanAuctionTokenDetails = async (addresses: string[]) => {
+
+
+
+const getFanAuctionTokenDetails = async (addresses: string[]): Promise<{ id: string, symbol: string }[]> => {
   const graphQLClient = new GraphQLClient(
     "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
   );
 
-  const query = `
-  query MyQuery($addresses: [ID!]) {
-    tokens(where: {id_in: $addresses}) {
-      symbol
-      id
+  const query = gql`
+    query MyQuery($addresses: [ID!]) {
+      tokens(where: {id_in: $addresses}) {
+        symbol
+        id
+      }
     }
-  }`
-  const variables = {
-    addresses
+  `;
+  const variables = { addresses };
+
+  try {
+    const data = await graphQLClient.request<{ tokens: { id: string, symbol: string }[] }>(query, variables);
+    return data.tokens;
+  } catch (e) {
+    throw new Error(`getFanAuctionTokenDetails: ${(e as Error).message}`);
   }
-  const data = await graphQLClient.request(query, variables);
-  console.log(data);
-}
+};
+
 
 const getUserFidDetails = async (fid: string) => {
   const query = `query MyQuery {
@@ -180,7 +230,6 @@ const getUserFidDetails = async (fid: string) => {
 
   const { data } = await response.json();
   if (data && data.Socials && data.Socials.Social && data.Socials.Social.length > 0) {
-    console.log(data.Socials.Social[0]);
     return data.Socials.Social[0];
   } else {
     return null;
@@ -210,13 +259,8 @@ const getChannelCidDetails = async (cid: string) => {
 
   const { data } = await response.json();
   if (data && data.FarcasterChannels && data.FarcasterChannels.FarcasterChannel && data.FarcasterChannels.FarcasterChannel.length > 0) {
-    console.log(data.FarcasterChannels.FarcasterChannel[0]);
     return data.FarcasterChannels.FarcasterChannel[0];
   } else {
     return null;
   }
 }
-
-// getChannelCidDetails("airstack");
-// getUserFidDetails("500605")
-// getFanAuctionTokenDetails(["0x3a2281e71dc0aabecfa8045959cf3020f2a562e6", "0x0f111d81573000a3e4df7f5d3da8d335abe9e806"]);

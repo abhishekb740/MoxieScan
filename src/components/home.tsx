@@ -42,16 +42,16 @@ const Hero = () => {
   );
 
   return (
-    <div className="px-20">
+    <div className="px-20 font-rubik">
       <div>
         <table className="min-w-full divide-y divide-gray-200 bg-black text-white" style={{ borderCollapse: 'separate', borderSpacing: '0' }}>
           <thead className="">
-            <tr className="bg-purple-700">
-              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider" style={{ borderTopLeftRadius: '0.75rem', borderBottomLeftRadius: '0.75rem' }}>User Address</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">Auctioning Token</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">Tokens Bidded</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>Timestamp</th>
+            <tr className="bg-purple-700 text-md">
+              <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopLeftRadius: '0.75rem', borderBottomLeftRadius: '0.75rem' }}>User</th>
+              <th className="px-6 py-3 text-white tracking-wider text-left">Moxie</th>
+              <th className="px-6 py-3 text-white tracking-wider text-left">Bid</th>
+              <th className="px-6 py-3 text-white tracking-wider text-left">Current Price</th>
+              <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>Time</th>
             </tr>
           </thead>
           <tbody className="bg-black divide-y divide-gray-700">
@@ -63,16 +63,24 @@ const Hero = () => {
                   </div>
                   {bid.profileName === null ? bid.user.address.slice(0, 5) + "..." + bid.user.address.slice(bid.user.address.length - 4, bid.user.address.length) : bid.profileName}
                 </td>
-                <td className="px-6 py-4 text-center whitespace-nowrap">Bided On {bid.auctioningToken}</td>
-                <td className="px-6 py-4 text-center whitespace-nowrap">{bid.volume} Moxie</td>
-                <td className="px-6 py-4 text-center whitespace-nowrap">{bid.price}$</td>
-                <td className="px-6 py-4 text-center whitespace-nowrap" style={index === paginatedBids.length - 1 ? { borderBottomRightRadius: '0.75rem' } : {}}>{formatRelativeTime(Number(bid.timestamp))}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{bid.volume} Moxie</td>
+                <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center">
+                  <div className="text-[#F7BF6A]">
+                    bided on
+                  </div>
+                  <div>
+                    <img className='w-8 h-8 rounded-full' src={bid.tokenProfileImage ?? ''} alt="token profile Image" />
+                  </div>
+                  {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{bid.price}$</td>
+                <td className="px-6 py-4 whitespace-nowrap" style={index === paginatedBids.length - 1 ? { borderBottomRightRadius: '0.75rem' } : {}}>{formatRelativeTime(Number(bid.timestamp))}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="mt-4 flex justify-between">
+      <div className="mt-4 flex justify-center gap-8">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}

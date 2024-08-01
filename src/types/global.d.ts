@@ -52,6 +52,8 @@ interface Bid {
     auctionId?: string;
     profileName?: string | null;
     profileImage?: string | null;
+    tokenProfileImage?: string | null;
+    tokenProfileName?: string | null;
 }
 
 interface TokenLockWallet {
