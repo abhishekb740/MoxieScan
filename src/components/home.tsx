@@ -80,7 +80,7 @@ const Hero = () => {
           </tbody>
         </table>
       </div>
-      <div className="mt-4 flex justify-center gap-8">
+      <div className="mt-4 flex justify-center gap-8 items-center mb-4">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
