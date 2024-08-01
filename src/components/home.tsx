@@ -58,7 +58,7 @@ const Hero = () => {
           <tbody className="bg-black divide-y divide-gray-700">
             {paginatedBids.map((bid, index) => (
               <tr key={bid.encodedOrderId}>
-                <td className="px-6 py-4 whitespace-nowrap" style={index === paginatedBids.length - 1 ? { borderBottomLeftRadius: '0.75rem' } : {}}>{bid.user.address}</td>
+                <td className="px-6 py-4 whitespace-nowrap" style={index === paginatedBids.length - 1 ? { borderBottomLeftRadius: '0.75rem' } : {}}>{bid.profileName===null ? bid.user.address.slice(0,5)+"..."+bid.user.address.slice(bid.user.address.length-4, bid.user.address.length) : bid.profileName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">Bided On {bid.auctioningToken}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{bid.volume} Moxie</td>
                 <td className="px-6 py-4 whitespace-nowrap">{bid.price}$</td>

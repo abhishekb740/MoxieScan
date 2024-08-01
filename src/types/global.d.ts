@@ -144,5 +144,6 @@ interface Bid {
     volume: string;
     auctioningToken?: string;
     auctionId?: string;
+    profileName?: string | null;
 }
 

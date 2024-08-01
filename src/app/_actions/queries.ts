@@ -11,6 +11,31 @@ interface MyQueryResponse {
   tokenLockWallets: TokenLockWallet[];
 }
 
+interface AllAuction {
+  auctionId: string;
+  auctioningToken: string;
+  biddingToken: string;
+}
+
+interface Bid {
+  buyAmount: string;
+  encodedOrderId: string;
+  isExactOrder: boolean;
+  price: string;
+  sellAmount: string;
+  status: string;
+  timestamp: number;
+  txHash: string;
+  user: {
+    address: string;
+  };
+  userWalletAddress: string;
+  volume: string;
+  auctioningToken: string;
+  auctionId: string;
+  profileName?: string | null;
+}
+
 // Define the queries
 const fetchAuctionsQuery = gql`
   query {
@@ -42,8 +67,7 @@ const fetchBidsQuery = gql`
   }
 `;
 
-
-export const getUserDetails = async () => {
+export const getUserDetails = async (address: string) => {
   const graphQLClient = new GraphQLClient(
     "https://api.studio.thegraph.com/query/23537/moxie_vesting_mainnet/version/latest"
   );
@@ -58,18 +82,20 @@ export const getUserDetails = async () => {
   `;
 
   const variables = {
-    address: "0x12dd27a8419d79dc748e8573d4b8b8b3484aa917",
+    address,
   };
 
   try {
-    const data = await graphQLClient.request(query, variables);
-    console.log(data);
+    const data = await graphQLClient.request<MyQueryResponse>(query, variables);
+    if (data.tokenLockWallets.length > 0) {
+      return data.tokenLockWallets[0].beneficiary;
+    } else {
+      return null;
+    }
   } catch (e) {
-    throw new Error((e as unknown as Error).toString());
+    throw new Error(`getUserDetails: ${(e as Error).message}`);
   }
 };
-getUserDetails();
-
 
 const getUserNameFromBeneficiary = async (beneficiary: string) => {
   const query = `query MyQuery {
@@ -91,7 +117,11 @@ const getUserNameFromBeneficiary = async (beneficiary: string) => {
   });
 
   const { data } = await response.json();
-  return data.Socials.Social[0].profileName;
+  if (data && data.Socials && data.Socials.Social && data.Socials.Social.length > 0) {
+    return data.Socials.Social[0].profileName;
+  } else {
+    return null;
+  }
 };
 
 export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
@@ -107,23 +137,31 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
     // Fetch bids for each auction
     const bidsPromises = auctions.map(async (auction) => {
       const bidsData = await graphQLClient.request<{ orders: Bid[] }>(fetchBidsQuery, { auctionId: auction.auctionId });
-
-      // Fetch profile names for each bid
-      const bidsWithProfileNames = await Promise.all(bidsData.orders.map(async (bid) => {
-        // const beneficiary = await getUserDetails(bid.userWalletAddress);
-        // const profileName = await getUserNameFromBeneficiary(beneficiary);
-        return { ...bid, auctioningToken: auction.auctioningToken, auctionId: auction.auctionId };
+      return bidsData.orders.map(bid => ({
+        ...bid,
+        auctioningToken: auction.auctioningToken,
+        auctionId: auction.auctionId
       }));
-
-      return bidsWithProfileNames;
     });
 
     const bidsArray = await Promise.all(bidsPromises);
     const allBids = bidsArray.flat();
 
-    // Sort bids by timestamp
-    return allBids.sort((a, b) => b.timestamp - a.timestamp);
+    // Sort bids by timestamp and get top 100 latest bids
+    const top100Bids = allBids.sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
+
+    // Fetch profile names for top 100 bids
+    const bidsWithProfileNames = await Promise.all(top100Bids.map(async (bid) => {
+      const beneficiary = await getUserDetails(bid.user.address);
+      let profileName = null;
+      if (beneficiary) {
+        profileName = await getUserNameFromBeneficiary(beneficiary);
+      }
+      return { ...bid, profileName};
+    }));
+
+    return bidsWithProfileNames;
   } catch (e) {
-    throw new Error((e as unknown as Error).toString());
+    throw new Error(`fetchAuctionsWithBids: ${(e as Error).message}`);
   }
 };
