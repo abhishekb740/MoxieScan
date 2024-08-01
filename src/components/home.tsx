@@ -17,7 +17,6 @@ const Hero = () => {
     const getBids = async () => {
       try {
         const data = await fetchAuctionsWithBids();
-        // Sort bids by timestamp in descending order (newest first)
         data.sort((a, b) => b.timestamp - a.timestamp);
         setBids(data);
         setTotalBids(data.length);
