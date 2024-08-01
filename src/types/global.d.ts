@@ -147,3 +147,12 @@ interface Bid {
     profileName?: string | null;
 }
 
+interface TokenLockWallet {
+    beneficiary: string;
+    address: string;
+}
+
+interface MyQueryResponse {
+    tokenLockWallets: TokenLockWallet[];
+}
+

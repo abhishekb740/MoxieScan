@@ -2,39 +2,7 @@
 
 import { gql, GraphQLClient } from "graphql-request";
 
-interface TokenLockWallet {
-  beneficiary: string;
-  address: string;
-}
 
-interface MyQueryResponse {
-  tokenLockWallets: TokenLockWallet[];
-}
-
-interface AllAuction {
-  auctionId: string;
-  auctioningToken: string;
-  biddingToken: string;
-}
-
-interface Bid {
-  buyAmount: string;
-  encodedOrderId: string;
-  isExactOrder: boolean;
-  price: string;
-  sellAmount: string;
-  status: string;
-  timestamp: number;
-  txHash: string;
-  user: {
-    address: string;
-  };
-  userWalletAddress: string;
-  volume: string;
-  auctioningToken: string;
-  auctionId: string;
-  profileName?: string | null;
-}
 
 // Define the queries
 const fetchAuctionsQuery = gql`

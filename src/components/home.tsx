@@ -42,17 +42,16 @@ const Hero = () => {
   );
 
   return (
-    <div className="p-4">
+    <div className="px-20">
       <div>
-        {error && <p className="text-red-500">{error}</p>}
         <table className="min-w-full divide-y divide-gray-200 bg-black text-white" style={{ borderCollapse: 'separate', borderSpacing: '0' }}>
-          <thead className="bg-purple-700" style={{ borderRadius: '0.75rem' }}>
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" style={{ borderTopLeftRadius: '0.75rem' }}>User Address</th>
+          <thead className="">
+            <tr className="bg-purple-700">
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" style={{ borderTopLeftRadius: '0.75rem', borderBottomLeftRadius: '0.75rem' }}>User Address</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Auctioning Token</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tokens Bidded</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" style={{ borderTopRightRadius: '0.75rem' }}>Timestamp</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>Timestamp</th>
             </tr>
           </thead>
           <tbody className="bg-black divide-y divide-gray-700">

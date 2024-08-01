@@ -1,7 +1,7 @@
 
 const Navbar = () => {
     return (
-        <div className="flex flex-row p-6 rounded-lg justify-center">
+        <div className="flex flex-row px-2 py-4 rounded-lg justify-center">
             <div className="text-2xl font-bold">
                 MoxieScan
             </div>
