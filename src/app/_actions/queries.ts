@@ -3,7 +3,6 @@
 import { graphql } from "graphql";
 import { gql, GraphQLClient } from "graphql-request";
 
-// Define the queries
 const fetchAuctionsQuery = gql`
   query {
     newAuctions {
