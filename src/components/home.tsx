@@ -25,7 +25,7 @@ const Hero = ({ initialBids, totalBids }: HeroProps) => {
             } catch (error) {
                 console.error("Failed to fetch bids:", error);
             }
-        }, 2000);
+        }, 15000);
 
         return () => clearInterval(interval);
     }, []);
