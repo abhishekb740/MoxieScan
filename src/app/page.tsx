@@ -21,7 +21,7 @@ export default async function Home() {
     );
   } catch {
     return (
-      <main className="flex min-h-screen flex-col">
+      <main className="flex min-h-screen flex-col items-center">
         <div>
           <div className="m-4">
             <Navbar />
