@@ -74,7 +74,7 @@ const Hero = () => {
                   </div>
                   {bid.profileName === null ? bid.user.address.slice(0, 5) + "..." + bid.user.address.slice(bid.user.address.length - 4, bid.user.address.length) : bid.profileName}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{bid.volume} Moxie</td>
+                <td className="px-6 py-4 whitespace-nowrap">{Number(bid.volume).toLocaleString()} Moxie</td>
                 <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center">
                   <div className="text-[#F7BF6A]">
                     bids on
