@@ -50,11 +50,11 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                 <table className="min-w-full bg-black text-white">
                     <thead>
                         <tr className="bg-purple-700 text-md">
-                            <th className="px-6 py-3 text-white tracking-wider text-left">User</th>
+                            <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopLeftRadius: '0.75rem', borderBottomLeftRadius: '0.75rem' }}>User</th>
                             <th className="px-6 py-3 text-white tracking-wider text-left">Moxie</th>
                             <th className="px-6 py-3 text-white tracking-wider text-left">Bid</th>
                             <th className="px-6 py-3 text-white tracking-wider text-left">Current Price</th>
-                            <th className="px-6 py-3 text-white tracking-wider text-left">Time</th>
+                            <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>Time</th>
                         </tr>
                     </thead>
                     <tbody className="bg-black divide-y divide-gray-700">
