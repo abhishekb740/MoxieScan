@@ -3,6 +3,7 @@
 import { fetchAuctionsWithBids } from "@/app/_actions/queries";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 const PAGE_SIZE = 10;
 
@@ -18,6 +19,7 @@ const Hero = () => {
       try {
         const data = await fetchAuctionsWithBids();
         data.sort((a, b) => b.timestamp - a.timestamp);
+        console.log(data);
         setBids(data);
         setTotalBids(data.length);
         setLoading(false);
@@ -67,27 +69,47 @@ const Hero = () => {
             {paginatedBids.map((bid, index) => (
               <tr key={bid.encodedOrderId}>
                 <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center" style={index === paginatedBids.length - 1 ? { borderBottomLeftRadius: '0.75rem' } : {}}>
-                  <div>
-                    {bid.profileImage ? <img className='w-8 h-8 rounded-full' src={bid.profileImage ?? ''} alt="profile Image" /> :
-                      <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
-                    }
-                  </div>
-                  {bid.profileName === null ? bid.user.address.slice(0, 5) + "..." + bid.user.address.slice(bid.user.address.length - 4, bid.user.address.length) : bid.profileName}
+                  {bid.profileName ? (
+                    <Link target="_blank" className="flex flex-row gap-2 items-center" href={`https://warpcast.com/${bid.profileName}`}>
+                      <div>
+                        {bid.profileImage ? (
+                          <img className="w-8 h-8 rounded-full" src={bid.profileImage ?? ''} alt="profile Image" />
+                        ) : (
+                          <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
+                        )}
+                      </div>
+                      {bid.profileName}
+                    </Link>
+                  ) : (
+                    <div className="flex flex-row gap-2 items-center">
+                      <div>
+                        {bid.profileImage ? (
+                          <img className="w-8 h-8 rounded-full" src={bid.profileImage ?? ''} alt="profile Image" />
+                        ) : (
+                          <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
+                        )}
+                      </div>
+                      {bid.user.address.slice(0, 5) + "..." + bid.user.address.slice(bid.user.address.length - 4, bid.user.address.length)}
+                    </div>
+                  )}
+
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{Number(bid.volume).toLocaleString()} Moxie</td>
                 <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center">
                   <div className="text-[#F7BF6A]">
                     bids on
                   </div>
-                  <div>
-                    {
-                      bid.tokenProfileImage ?
-                        <img className='w-8 h-8 rounded-full' src={bid.tokenProfileImage ?? ''} alt="token profile Image" />
-                        :
-                        <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
-                    }
-                  </div>
-                  {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
+                  <Link className="flex flex-row gap-2 items-center" target="_black" href={bid.isFid ? `https://warpcast.com/${bid.tokenProfileName}` : `https://warpcast.com/~/channel/${bid.channelId}`} >
+                    <div>
+                      {
+                        bid.tokenProfileImage ?
+                          <img className='w-8 h-8 rounded-full' src={bid.tokenProfileImage ?? ''} alt="token profile Image" />
+                          :
+                          <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
+                      }
+                    </div>
+                    {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
+                  </Link>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{Number(bid.price).toLocaleString()}$</td>
                 <td className="px-6 py-4 whitespace-nowrap" style={index === paginatedBids.length - 1 ? { borderBottomRightRadius: '0.75rem' } : {}}>{formatRelativeTime(Number(bid.timestamp))}</td>

@@ -54,6 +54,8 @@ interface Bid {
     profileImage?: string | null;
     tokenProfileImage?: string | null;
     tokenProfileName?: string | null;
+    isFid?: boolean;
+    channelId?: string | null;
 }
 
 interface TokenLockWallet {
