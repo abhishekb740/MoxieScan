@@ -133,6 +133,8 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
 
       let tokenProfileName = tokenDetail.symbol;
       let tokenProfileImage = null;
+      let channelId = null;
+      let isFid = false;
 
       if (tokenDetail.symbol.startsWith('cid:')) {
         const cid = tokenDetail.symbol.replace('cid:', '');
@@ -141,6 +143,7 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
           if (channelDetail) {
             tokenProfileName = channelDetail.name;
             tokenProfileImage = channelDetail.imageUrl;
+            channelId = cid;
           }
         } catch (e) {
           console.error(`Error fetching channel details for cid ${cid}: ${(e as Error).message}`);
@@ -152,13 +155,14 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
           if (userDetail) {
             tokenProfileName = userDetail.profileName;
             tokenProfileImage = userDetail.profileImage;
+            isFid = true;
           }
         } catch (e) {
           console.error(`Error fetching user details for fid ${fid}: ${(e as Error).message}`);
         }
       }
 
-      return { ...bid, tokenProfileName, tokenProfileImage };
+      return { ...bid, tokenProfileName, tokenProfileImage, isFid, channelId };
     }));
 
     const bidsWithProfileNames = await Promise.all(bidsWithDetails.map(async (bid) => {
