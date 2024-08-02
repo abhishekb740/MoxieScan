@@ -9,11 +9,12 @@ import { fetchAuctionsWithBids } from "@/app/_actions/queries";
 const PAGE_SIZE = 10;
 
 type HeroProps = {
+    price: number;
     initialBids: Bid[];
     totalBids: number;
 };
 
-const Hero = ({ initialBids, totalBids }: HeroProps) => {
+const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [bids, setBids] = useState<Bid[]>(initialBids);
     const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -98,7 +99,7 @@ const Hero = ({ initialBids, totalBids }: HeroProps) => {
                                         {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
                                     </Link>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">{Number(bid.price).toLocaleString()}$</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{(Number(bid.volume) * price).toLocaleString()}$</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{formatRelativeTime(Number(bid.timestamp))}</td>
                             </tr>
                         ))}

@@ -267,3 +267,18 @@ const getChannelCidDetails = async (cid: string) => {
     return null;
   }
 }
+
+export const fetchMoxiePrice = async () => {
+  const response = await fetch(
+    "https://api.coingecko.com/api/v3/simple/price?ids=moxie&vs_currencies=usd",
+  );
+  const data = await response.json();
+  let price = 0;
+  if (data?.status?.error_code === 429) {
+    price = 0.0184;
+  } else {
+    price = data["moxie"]?.usd;
+  }
+  console.log(price);
+  return price;
+};
