@@ -1,18 +1,33 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { fetchAuctionsWithBids } from "@/app/_actions/queries";
 
 const PAGE_SIZE = 10;
 
 type HeroProps = {
-  bids: Bid[];
+  initialBids: Bid[];
   totalBids: number;
 };
 
-const Hero = ({ bids, totalBids }: HeroProps) => {
+const Hero = ({ initialBids, totalBids }: HeroProps) => {
+  const [bids, setBids] = useState<Bid[]>(initialBids);
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const updatedBids = await fetchAuctionsWithBids();
+        setBids(updatedBids);
+      } catch (error) {
+        console.error("Failed to fetch bids:", error);
+      }
+    }, 2000); // Re-fetch every 2 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const formatRelativeTime = (timestamp: number) => {
     return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });

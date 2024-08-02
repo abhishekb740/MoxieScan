@@ -1,16 +1,9 @@
 import Navbar from "@/components/navbar";
-import dynamic from "next/dynamic";
 import { fetchAuctionsWithBids } from "@/app/_actions/queries";
+import Hero from "@/components/home";
 
 export const fetchCache = "force-no-store";
-
-const Hero = dynamic(() => import("@/components/home"), {
-  loading: () => (
-    <div className="flex bg-opacity-50 z-50 justify-center items-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  ),
-});
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   try {
@@ -22,7 +15,7 @@ export default async function Home() {
           <div className="m-4">
             <Navbar />
           </div>
-          <Hero bids={data as Bid[]} totalBids={data.length} />
+          <Hero initialBids={data as Bid[]} totalBids={data.length} />
         </div>
       </main>
     );
