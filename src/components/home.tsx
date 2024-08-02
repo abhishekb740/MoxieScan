@@ -89,7 +89,7 @@ const Hero = () => {
                   </div>
                   {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{bid.price}$</td>
+                <td className="px-6 py-4 whitespace-nowrap">{Number(bid.price).toLocaleString()}$</td>
                 <td className="px-6 py-4 whitespace-nowrap" style={index === paginatedBids.length - 1 ? { borderBottomRightRadius: '0.75rem' } : {}}>{formatRelativeTime(Number(bid.timestamp))}</td>
               </tr>
             ))}
