@@ -77,7 +77,7 @@ const Hero = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{bid.volume} Moxie</td>
                 <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center">
                   <div className="text-[#F7BF6A]">
-                    bided on
+                    bids on
                   </div>
                   <div>
                     {
