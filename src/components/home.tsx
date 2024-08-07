@@ -63,7 +63,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                 <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center">
                                     {bid.profileName ? (
                                         <Link target="_blank" className="flex flex-row gap-2 items-center" href={`https://warpcast.com/${bid.profileName}`}>
-                                            <div>
+                                            <div className="flex-shrink-0">
                                                 {bid.profileImage ? (
                                                     <img className="w-8 h-8 rounded-full" src={bid.profileImage ?? ''} alt="profile Image" />
                                                 ) : (
