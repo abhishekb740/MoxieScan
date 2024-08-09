@@ -19,7 +19,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [bids, setBids] = useState<Bid[]>(initialBids);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [newBids, setNewBids] = useState<Bid[]>([]);
-
+    
     useEffect(() => {
         const interval = setInterval(async () => {
             try {
@@ -62,9 +62,6 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                             <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>Time</th>
                         </tr>
                     </thead>
-
-
-
                     <tbody className="bg-black divide-y divide-gray-700">
                         {paginatedBids.map((bid) => {
                             const isNewBid = newBids.some(newBid => newBid.encodedOrderId === bid.encodedOrderId);
@@ -123,8 +120,6 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                             );
                         })}
                     </tbody>
-
-
                 </table>
             </div>
             <div className="mt-4 flex justify-center gap-4 md:gap-8 items-center mb-4">

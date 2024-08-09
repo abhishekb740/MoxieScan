@@ -1,6 +1,5 @@
 "use server";
 
-import { graphql } from "graphql";
 import { gql, GraphQLClient } from "graphql-request";
 
 const fetchAuctionsQuery = gql`
@@ -185,7 +184,29 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
   }
 };
 
+export const fetchSellOrdersForAAuction = async (auctionId: string) => {
+  const query = gql`query MyQuery {
+    orders(where: {status: Placed, auctionId: 1}) {
+      user {
+        id
+      }
+      buyAmount
+      sellAmount
+    }
+  }`
 
+  const graphQLClient = new GraphQLClient(
+    "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
+  );
+
+  try {
+    const data = await graphQLClient.request<{ orders: { user: { id: string }, buyAmount: string, sellAmount: string }[] }>(query);
+    return data.orders;
+  } catch (e) {
+    throw new Error(`fetchSellOrders: ${(e as Error).message}`);
+  }
+
+}
 
 
 const getFanAuctionTokenDetails = async (addresses: string[]): Promise<{ id: string, symbol: string }[]> => {
