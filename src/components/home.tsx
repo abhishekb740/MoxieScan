@@ -29,7 +29,6 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                 const updatedBids = await fetchAuctionsWithBids();
                 const newBids = updatedBids.filter((bid) => !bids.some((b) => b.encodedOrderId === bid.encodedOrderId));
                 setNewBids(newBids);
-                console.log(newBids);
                 setBids(updatedBids);
             } catch (error) {
                 console.error("Failed to fetch bids:", error);
@@ -47,8 +46,6 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         (currentPage - 1) * PAGE_SIZE,
         currentPage * PAGE_SIZE
     );
-
-    console.log("CURRENT PAGE BIDS", bids);
 
     return (
         <div className="px-4 md:px-20 font-rubik">

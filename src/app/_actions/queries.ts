@@ -300,6 +300,5 @@ export const fetchMoxiePrice = async () => {
   } else {
     price = data["moxie"]?.usd;
   }
-  console.log(price);
   return price;
 };
