@@ -135,7 +135,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                     </tbody>
                 </table>
             </div>
-            <Paginate currentPage={currentPage} totalBids={totalBids} PAGE_SIZE={PAGE_SIZE} setCurrentPage={setCurrentPage} />
+            <Paginate currentPage={Number(currentPage) ?? 1} totalBids={totalBids} PAGE_SIZE={PAGE_SIZE} setCurrentPage={setCurrentPage} />
         </div>
     );
 };
