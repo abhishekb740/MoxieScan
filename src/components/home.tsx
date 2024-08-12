@@ -7,8 +7,10 @@ import Link from "next/link";
 import { fetchAuctionsWithBids } from "@/app/_actions/queries";
 import {motion} from "framer-motion";
 import Paginate from "./pagination/Paginate";
+import Farcaster from "@/icons/Farcaster"
+import { formatNumber } from "@/utils/helpers"
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 9;
 
 type HeroProps = {
     price: number;
@@ -52,13 +54,13 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         <div className="px-4 md:px-20 font-rubik">
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-black text-white">
-                    <thead>
-                        <tr className="bg-purple-700 text-md">
+                    <thead className="py-4 border-b border-[#CBD5E11F] border-opacity-10">
+                        <tr className="text-md">
                             <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopLeftRadius: '0.75rem', borderBottomLeftRadius: '0.75rem' }}>User</th>
                             <th className="px-6 py-3 text-white tracking-wider text-left">Token</th>
-                            <th className="px-6 py-3 text-white tracking-wider text-left">Moxie</th>
-                            <th className="px-6 py-3 text-white tracking-wider text-left">Current Price</th>
+                            <th className="px-6 py-3 text-white tracking-wider text-left">Bid</th>
                             <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}></th>
+                            <th className="px-6 py-3 text-white tracking-wider text-left"></th>
                         </tr>
                     </thead>
                     <tbody className="bg-black">
@@ -85,6 +87,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                                     )}
                                                 </div>
                                                 {bid.profileName}
+                                                <Farcaster />
                                             </Link>
                                         ) : (
                                             <div className="flex flex-row gap-2 items-center">
@@ -96,12 +99,13 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                                     )}
                                                 </div>
                                                 {bid.user.address.slice(0, 5) + "..." + bid.user.address.slice(bid.user.address.length - 4, bid.user.address.length)}
+                                                <Farcaster />
                                             </div>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-row items-center justify-start gap-2">
-                                            <div className="text-[#F7BF6A]">bids on</div>
+                                            <div className="text-[#F7BF6A] font-bold">bids on</div>
                                             <Link className="flex flex-row gap-2 items-center" target="_black" href={bid.isFid ? `https://warpcast.com/${bid.tokenProfileName}` : `https://warpcast.com/~/channel/${bid.channelId}`}>
                                                 <div>
                                                     {bid.tokenProfileImage ? (
@@ -111,12 +115,20 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                                     )}
                                                 </div>
                                                 {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
+                                                <Farcaster />
                                             </Link>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{Number(bid.volume).toLocaleString()} Moxie</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{(Number(bid.volume) * price).toLocaleString()}$</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{formatRelativeTime(Number(bid.timestamp))}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {formatNumber(Number(bid.volume))} MOXIE 
+                                        <span className="text-xs text-[#767676] ml-1">({(Number(bid.volume) * price).toLocaleString()}$)</span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-[#767676]">{formatRelativeTime(Number(bid.timestamp))}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <button className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
+                                            Bid
+                                        </button>
+                                    </td>
                                 </motion.tr>
                             );
                         })}

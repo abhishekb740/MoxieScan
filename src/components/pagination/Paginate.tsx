@@ -1,6 +1,6 @@
 import React from "react";
 
-interface PaginateProps {
+type PaginateProps = {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   totalBids: number;
@@ -22,16 +22,16 @@ const Paginate = ({
         <>
           <button
             onClick={() => handlePageChange(1)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 1 ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 1 ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             1
           </button>
           <button
             onClick={() => handlePageChange(2)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 2 ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 2 ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             2
@@ -39,10 +39,10 @@ const Paginate = ({
           <span>...</span>
           <button
             onClick={() => handlePageChange(Math.ceil(totalBids / PAGE_SIZE))}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE)
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE)}
@@ -52,24 +52,24 @@ const Paginate = ({
         <>
           <button
             onClick={() => handlePageChange(1)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 1  ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 1  ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             1
           </button>
           <button
             onClick={() => handlePageChange(2)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 2 ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 2 ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             2
           </button>
           <button
             onClick={() => handlePageChange(3)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 3 ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 3 ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             3
@@ -77,10 +77,10 @@ const Paginate = ({
           <span>...</span>
           <button
             onClick={() => handlePageChange(Math.ceil(totalBids / PAGE_SIZE))}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE)
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE)}
@@ -90,8 +90,8 @@ const Paginate = ({
         <>
           <button
             onClick={() => handlePageChange(1)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 1 ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 1 ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             1
@@ -101,10 +101,10 @@ const Paginate = ({
             onClick={() =>
               handlePageChange(Math.ceil(totalBids / PAGE_SIZE) - 2)
             }
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE) - 2
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE) - 2}
@@ -113,20 +113,20 @@ const Paginate = ({
             onClick={() =>
               handlePageChange(Math.ceil(totalBids / PAGE_SIZE) - 1)
             }
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE) - 1
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE) - 1}
           </button>
           <button
             onClick={() => handlePageChange(Math.ceil(totalBids / PAGE_SIZE))}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE)
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE)}
@@ -136,8 +136,8 @@ const Paginate = ({
         <>
           <button
             onClick={() => handlePageChange(1)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 1 ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 1 ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             1
@@ -147,10 +147,10 @@ const Paginate = ({
             onClick={() =>
               handlePageChange(Math.ceil(totalBids / PAGE_SIZE) - 2)
             }
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE) - 2
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE) - 2}
@@ -159,20 +159,20 @@ const Paginate = ({
             onClick={() =>
               handlePageChange(Math.ceil(totalBids / PAGE_SIZE) - 1)
             }
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE) - 1
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE) - 1}
           </button>
           <button
             onClick={() => handlePageChange(Math.ceil(totalBids / PAGE_SIZE))}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE)
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE)}
@@ -182,8 +182,8 @@ const Paginate = ({
         <>
           <button
             onClick={() => handlePageChange(1)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
-                currentPage === 1 ? "bg-purple-900" : ""
+            className={`px-4 py-2 text-white rounded-[12px] ${
+                currentPage === 1 ? "bg-[#8658F6]" : "bg-[#2A2A2A]"
             }`}
           >
             1
@@ -191,29 +191,29 @@ const Paginate = ({
           <span>...</span>
           <button
             onClick={() => handlePageChange(currentPage - 1)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded`}
+            className={`px-4 py-2 bg-[#2A2A2A] text-white rounded-[12px]`}
           >
             {currentPage - 1}
           </button>
           <button
             onClick={() => handlePageChange(currentPage)}
-            className={`px-4 py-2 text-white rounded bg-purple-900`}
+            className={`px-4 py-2 text-white rounded-[12px] bg-[#8658F6]`}
           >
             {currentPage}
           </button>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
-            className={`px-4 py-2 bg-purple-700 text-white rounded`}
+            className={`px-4 py-2 bg-[#2A2A2A] text-white rounded-[12px]`}
           >
             {currentPage + 1}
           </button>
           <span>...</span>
           <button
             onClick={() => handlePageChange(Math.ceil(totalBids / PAGE_SIZE))}
-            className={`px-4 py-2 bg-purple-700 text-white rounded ${
+            className={`px-4 py-2 text-white rounded-[12px] ${
                 currentPage === Math.ceil(totalBids / PAGE_SIZE)
-                ? "bg-purple-900"
-                : ""
+                ? "bg-[#8658F6]"
+                : "bg-[#2A2A2A]"
             }`}
           >
             {Math.ceil(totalBids / PAGE_SIZE)}
