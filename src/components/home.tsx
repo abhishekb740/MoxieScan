@@ -8,6 +8,7 @@ import Paginate from "./pagination/Paginate";
 import Farcaster from "@/icons/Farcaster"
 import { formatNumber } from "@/utils/helpers"
 import { fetchAuctionsWithBids, bidOnAFanToken, fetchSellOrdersForAAuction } from "@/app/_actions/queries";
+import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
 
@@ -168,7 +169,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-[#767676]">{formatRelativeTime(Number(bid.timestamp))}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <button onClick={() => onBidHandler} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
+                                        <button onClick={() => onBidHandler(bid.auctionId ?? '')} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
                                             Bid
                                         </button>
                                     </td>
