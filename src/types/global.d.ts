@@ -18,6 +18,10 @@ interface AllAuction {
     userId: string;
 }
 
+interface Window {
+    ethereum?: any;
+}
+
 
 interface TrendingFanToken {
     buySideVolume: string;

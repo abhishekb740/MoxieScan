@@ -4,11 +4,12 @@
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { fetchAuctionsWithBids } from "@/app/_actions/queries";
-import {motion} from "framer-motion";
 import Paginate from "./pagination/Paginate";
 import Farcaster from "@/icons/Farcaster"
 import { formatNumber } from "@/utils/helpers"
+import { fetchAuctionsWithBids, bidOnAFanToken, fetchSellOrdersForAAuction } from "@/app/_actions/queries";
+import { motion } from "framer-motion";
+import { ethers } from "ethers";
 
 const PAGE_SIZE = 9;
 
@@ -22,7 +23,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [bids, setBids] = useState<Bid[]>(initialBids);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [newBids, setNewBids] = useState<Bid[]>([]);
-    
+
     useEffect(() => {
         const interval = setInterval(async () => {
             try {
@@ -37,6 +38,51 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
 
         return () => clearInterval(interval);
     }, []);
+
+    const onBidHandler = async (auctionId: string) => {
+        console.log("Hello")
+        try {
+            console.log("Bidding on a fan token:", auctionId);
+            const provider = new ethers.providers.Web3Provider(window.ethereum!);
+            const signer = provider.getSigner();
+
+            // const contract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
+            // const buyAmount = ethers.utils.parseUnits("1", 18);
+            // const sellAmount = ethers.utils.parseUnits("200", 18);
+
+            const sellOrders = await fetchSellOrdersForAAuction(auctionId);
+            console.log(sellOrders)
+
+            const encodeOrder = (order: { user: { id: string }; buyAmount: string; sellAmount: string }) => {
+                const buyAmountBn = ethers.BigNumber.from(order.buyAmount).mul(ethers.BigNumber.from(10).pow(18));
+                const sellAmountBn = ethers.BigNumber.from(order.sellAmount).mul(ethers.BigNumber.from(10).pow(18));
+
+                const userId = ethers.BigNumber.from(order.user.id).toHexString().slice(2).padStart(16, "0");
+                const buyAmountHex = buyAmountBn.toHexString().slice(2).padStart(24, "0");
+                const sellAmountHex = sellAmountBn.toHexString().slice(2).padStart(24, "0");
+                const encoded = (userId + buyAmountHex + sellAmountHex).slice(0, 64);
+                return "0x" + encoded;
+            }
+
+            const encodedOrders = sellOrders.map(encodeOrder);
+            console.log(encodedOrders)
+
+            // const tx = await contract.populateTransaction.placeSellOrders(
+            //     auctionId,
+            //     [buyAmount],
+            //     [sellAmount],
+            //     encodedOrders,
+            //     '0x'
+            // );
+
+            // const response = await signer.sendTransaction(tx);
+
+            // const receipt = await response.wait();
+            // console.log('Transaction successful:', receipt);
+        } catch (error) {
+            console.error("Failed to bid on a fan token:", error);
+        }
+    };
 
     const formatRelativeTime = (timestamp: number) => {
         return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });
@@ -122,7 +168,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-[#767676]">{formatRelativeTime(Number(bid.timestamp))}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <button className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
+                                        <button onClick={() => onBidHandler} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
                                             Bid
                                         </button>
                                     </td>
