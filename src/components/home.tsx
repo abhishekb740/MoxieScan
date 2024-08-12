@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { fetchAuctionsWithBids } from "@/app/_actions/queries";
 import {motion} from "framer-motion";
+import Paginate from "./pagination/Paginate";
 
 const PAGE_SIZE = 10;
 
@@ -40,14 +41,12 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });
     };
 
-    const handlePageChange = (newPage: number) => {
-        setCurrentPage(newPage);
-    };
-
     const paginatedBids = bids.slice(
         (currentPage - 1) * PAGE_SIZE,
         currentPage * PAGE_SIZE
     );
+
+    console.log("CURRENT PAGE BIDS", bids);
 
     return (
         <div className="px-4 md:px-20 font-rubik">
@@ -56,13 +55,13 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                     <thead>
                         <tr className="bg-purple-700 text-md">
                             <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopLeftRadius: '0.75rem', borderBottomLeftRadius: '0.75rem' }}>User</th>
+                            <th className="px-6 py-3 text-white tracking-wider text-left">Token</th>
                             <th className="px-6 py-3 text-white tracking-wider text-left">Moxie</th>
-                            <th className="px-6 py-3 text-white tracking-wider text-left">Bid</th>
                             <th className="px-6 py-3 text-white tracking-wider text-left">Current Price</th>
-                            <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>Time</th>
+                            <th className="px-6 py-3 text-white tracking-wider text-left" style={{ borderTopRightRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}></th>
                         </tr>
                     </thead>
-                    <tbody className="bg-black divide-y divide-gray-700">
+                    <tbody className="bg-black">
                         {paginatedBids.map((bid) => {
                             const isNewBid = newBids.some(newBid => newBid.encodedOrderId === bid.encodedOrderId);
 
@@ -100,20 +99,22 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{Number(bid.volume).toLocaleString()} Moxie</td>
-                                    <td className="px-6 py-4 whitespace-nowrap flex flex-row gap-2 items-center">
-                                        <div className="text-[#F7BF6A]">bids on</div>
-                                        <Link className="flex flex-row gap-2 items-center" target="_black" href={bid.isFid ? `https://warpcast.com/${bid.tokenProfileName}` : `https://warpcast.com/~/channel/${bid.channelId}`}>
-                                            <div>
-                                                {bid.tokenProfileImage ? (
-                                                    <img className='w-8 h-8 rounded-full' src={bid.tokenProfileImage ?? ''} alt="token profile Image" />
-                                                ) : (
-                                                    <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
-                                                )}
-                                            </div>
-                                            {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
-                                        </Link>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-row items-center justify-start gap-2">
+                                            <div className="text-[#F7BF6A]">bids on</div>
+                                            <Link className="flex flex-row gap-2 items-center" target="_black" href={bid.isFid ? `https://warpcast.com/${bid.tokenProfileName}` : `https://warpcast.com/~/channel/${bid.channelId}`}>
+                                                <div>
+                                                    {bid.tokenProfileImage ? (
+                                                        <img className='w-8 h-8 rounded-full' src={bid.tokenProfileImage ?? ''} alt="token profile Image" />
+                                                    ) : (
+                                                        <div className="bg-gradient-to-b from-violet-500 to-blue-600 w-8 h-8 rounded-full shadow-lg"></div>
+                                                    )}
+                                                </div>
+                                                {bid.tokenProfileName ?? bid.auctioningToken?.slice(0, 5) + "..." + bid.auctioningToken?.slice(bid.auctioningToken?.length - 4, bid.auctioningToken?.length)}
+                                            </Link>
+                                        </div>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{Number(bid.volume).toLocaleString()} Moxie</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{(Number(bid.volume) * price).toLocaleString()}$</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{formatRelativeTime(Number(bid.timestamp))}</td>
                                 </motion.tr>
@@ -122,25 +123,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                     </tbody>
                 </table>
             </div>
-            <div className="mt-4 flex justify-center gap-4 md:gap-8 items-center mb-4">
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-purple-700 text-white rounded disabled:opacity-50"
-                >
-                    Previous
-                </button>
-                <span>
-                    Page {currentPage} of {Math.ceil(totalBids / PAGE_SIZE)}
-                </span>
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === Math.ceil(totalBids / PAGE_SIZE)}
-                    className="px-4 py-2 bg-purple-700 text-white rounded disabled:opacity-50"
-                >
-                    Next
-                </button>
-            </div>
+            <Paginate currentPage={currentPage} totalBids={totalBids} PAGE_SIZE={PAGE_SIZE} setCurrentPage={setCurrentPage} />
         </div>
     );
 };
