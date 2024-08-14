@@ -7,7 +7,7 @@ import Link from "next/link";
 import Paginate from "./pagination/Paginate";
 import Farcaster from "@/icons/Farcaster"
 import { formatNumber } from "@/utils/helpers"
-import { fetchAuctionsWithBids, bidOnAFanToken, fetchSellOrdersForAAuction } from "@/app/_actions/queries";
+import { fetchAuctionsWithBids } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
@@ -40,50 +40,41 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         return () => clearInterval(interval);
     }, []);
 
-    const onBidHandler = async (auctionId: string) => {
-        console.log("Hello")
+    const onBidHandler = async (auctionId: string, price: string, encodedOrderId: string) => {
         try {
             console.log("Bidding on a fan token:", auctionId);
             const provider = new ethers.providers.Web3Provider(window.ethereum!);
             const signer = provider.getSigner();
+            const auctionContract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
+            const biddingTokenAddress = "0x8C9037D1Ef5c6D1f6816278C7AAF5491d24CD527";
+            const biddingTokenContract = new ethers.Contract(biddingTokenAddress, [
+                "function approve(address spender, uint256 amount) external returns (bool)"
+            ], signer);
 
-            // const contract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
-            // const buyAmount = ethers.utils.parseUnits("1", 18);
-            // const sellAmount = ethers.utils.parseUnits("200", 18);
+            const buyAmount = ethers.utils.parseUnits("100", 18);
+            const sellAmount = ethers.utils.parseUnits("200", 18);
 
-            const sellOrders = await fetchSellOrdersForAAuction(auctionId);
-            console.log(sellOrders)
+            const approveTx = await biddingTokenContract.approve(BaseABIAndAddress.address, sellAmount);
+            await approveTx.wait();
+            console.log('Approval successful:', approveTx);
 
-            const encodeOrder = (order: { user: { id: string }; buyAmount: string; sellAmount: string }) => {
-                const buyAmountBn = ethers.BigNumber.from(order.buyAmount).mul(ethers.BigNumber.from(10).pow(18));
-                const sellAmountBn = ethers.BigNumber.from(order.sellAmount).mul(ethers.BigNumber.from(10).pow(18));
+            const tx = await auctionContract.populateTransaction.placeSellOrders(
+                auctionId,
+                [buyAmount],
+                [sellAmount],
+                [encodedOrderId],
+                '0x'
+            );
 
-                const userId = ethers.BigNumber.from(order.user.id).toHexString().slice(2).padStart(16, "0");
-                const buyAmountHex = buyAmountBn.toHexString().slice(2).padStart(24, "0");
-                const sellAmountHex = sellAmountBn.toHexString().slice(2).padStart(24, "0");
-                const encoded = (userId + buyAmountHex + sellAmountHex).slice(0, 64);
-                return "0x" + encoded;
-            }
+            const response = await signer.sendTransaction(tx);
 
-            const encodedOrders = sellOrders.map(encodeOrder);
-            console.log(encodedOrders)
-
-            // const tx = await contract.populateTransaction.placeSellOrders(
-            //     auctionId,
-            //     [buyAmount],
-            //     [sellAmount],
-            //     encodedOrders,
-            //     '0x'
-            // );
-
-            // const response = await signer.sendTransaction(tx);
-
-            // const receipt = await response.wait();
-            // console.log('Transaction successful:', receipt);
+            const receipt = await response.wait();
+            console.log('Transaction successful:', receipt);
         } catch (error) {
             console.error("Failed to bid on a fan token:", error);
         }
     };
+
 
     const formatRelativeTime = (timestamp: number) => {
         return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });
@@ -164,12 +155,12 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        {formatNumber(Number(bid.volume))} MOXIE 
+                                        {formatNumber(Number(bid.volume))} MOXIE
                                         <span className="text-xs text-[#767676] ml-1">({(Number(bid.volume) * price).toLocaleString()}$)</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-[#767676]">{formatRelativeTime(Number(bid.timestamp))}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <button onClick={() => onBidHandler(bid.auctionId ?? '')} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
+                                        <button onClick={() => onBidHandler(bid.auctionId ?? '', bid.price, bid.encodedOrderId)} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
                                             Bid
                                         </button>
                                     </td>

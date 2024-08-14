@@ -1,9 +1,6 @@
 "use server";
 
 import { gql, GraphQLClient } from "graphql-request";
-import { basePublicClient, baseWalletClient } from "@/lib/config";
-import { ethers } from 'ethers';
-import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 
 const fetchAuctionsQuery = gql`
   query {
@@ -185,31 +182,6 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
   }
 };
 
-export const fetchSellOrdersForAAuction = async (auctionId: string) => {
-  const query = gql`query MyQuery {
-    orders(where: {status: Placed, auctionId: "${auctionId}"}) {
-      user {
-        id
-      }
-      buyAmount
-      sellAmount
-    }
-  }`
-
-  const graphQLClient = new GraphQLClient(
-    "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
-  );
-
-  try {
-    const data = await graphQLClient.request<{ orders: { user: { id: string }, buyAmount: string, sellAmount: string }[] }>(query);
-    return data.orders;
-  } catch (e) {
-    throw new Error(`fetchSellOrders: ${(e as Error).message}`);
-  }
-
-}
-
-
 const getFanAuctionTokenDetails = async (addresses: string[]): Promise<{ id: string, symbol: string }[]> => {
   const graphQLClient = new GraphQLClient(
     "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
@@ -305,49 +277,3 @@ export const fetchMoxiePrice = async () => {
 };
 
 
-export const bidOnAFanToken = async (auctionId: string, buyAmount: string, sellAmount: string, account: string) => {
-  const sellOrders = await fetchSellOrdersForAAuction(auctionId);
-
-  const encodeOrder = (order: {
-    user: { id: string };
-    buyAmount: string;
-    sellAmount: string;
-  }) => {
-    const buyAmountBn = ethers.BigNumber.from(order.buyAmount).mul(ethers.BigNumber.from(10).pow(18));
-    const sellAmountBn = ethers.BigNumber.from(order.sellAmount).mul(ethers.BigNumber.from(10).pow(18));
-
-    const userId = ethers.BigNumber.from(order.user.id).toHexString().slice(2).padStart(16, "0");
-    const buyAmount = buyAmountBn.toHexString().slice(2).padStart(24, "0");
-    const sellAmount = sellAmountBn.toHexString().slice(2).padStart(24, "0");
-    const encoded = (userId + buyAmount + sellAmount).slice(0, 64);
-    return "0x" + encoded;
-  }
-
-  let formattedAccount: `0x${string}` | undefined;
-
-  if (typeof account === 'string' && account.startsWith('0x')) {
-    formattedAccount = account as `0x${string}`;
-  } else {
-    formattedAccount = undefined;
-  }
-
-  const encodedOrders = sellOrders.map(encodeOrder);
-  console.log(encodedOrders);
-
-  const { request } = await basePublicClient.simulateContract({
-    address: `0x${BaseABIAndAddress.address}`,
-    abi: BaseABIAndAddress.abi,
-    functionName: 'placeSellOrders',
-    args: [
-      auctionId,
-      [ethers.utils.parseUnits(buyAmount, 18)],
-      [ethers.utils.parseUnits(sellAmount, 18)],
-      encodedOrders,
-      '0x'
-    ],
-    account: formattedAccount,
-  });
-
-  await baseWalletClient.writeContract(request);
-
-};

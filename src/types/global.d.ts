@@ -71,3 +71,15 @@ interface MyQueryResponse {
     tokenLockWallets: TokenLockWallet[];
 }
 
+interface SellOrder {
+    id: string;
+    encodedOrderId: string;
+    price: string;
+    sellAmount: string;
+    buyAmount: string;
+    user: {
+        id: string;
+        address: string;
+    };
+}
+
