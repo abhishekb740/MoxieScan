@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const Navbar = () => {
     return (
@@ -6,10 +7,7 @@ const Navbar = () => {
             <div className="text-2xl font-bold">
                 MoxieScan
             </div>
-            <button className="px-6 py-2 rounded-full text-base font-semibold bg-[#7F5FC6] flex flex-row items-center justify-center gap-2">
-                <Image src="/farcaster.png" alt="farcaster" width={20} height={20} />
-                <span>Connect</span>
-            </button>
+            <ConnectButton  accountStatus="address" showBalance={false} chainStatus="name"/>
         </div>
     )
 }
