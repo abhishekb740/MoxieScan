@@ -276,4 +276,35 @@ export const fetchMoxiePrice = async () => {
   return price;
 };
 
+export const fetchUserBids = async (userAddresses: string[]): Promise<UserBids[]> => {
+  const graphQLClient = new GraphQLClient(
+    "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
+  );
+
+  const query = gql`
+    query MyQuery($userAddresses: [Bytes!]) {
+      users(where: { address_in: $userAddresses }) {
+        participatedAuctions {
+          auctionId
+          auctioningToken {
+            id
+            symbol
+            decimals
+          }
+          txHash
+        }
+        address
+      }
+    }
+  `;
+
+  const variables = { userAddresses };
+
+  try {
+    const data = await graphQLClient.request<{ users: UserBids[] }>(query, variables);
+    return data.users;
+  } catch (e) {
+    throw new Error(`fetchUserBids: ${(e as Error).message}`);
+  }
+};
 

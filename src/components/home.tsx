@@ -7,7 +7,7 @@ import Link from "next/link";
 import Paginate from "./pagination/Paginate";
 import Farcaster from "@/icons/Farcaster"
 import { formatNumber } from "@/utils/helpers"
-import { fetchAuctionsWithBids } from "@/app/_actions/queries";
+import { fetchAuctionsWithBids, fetchUserBids } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
@@ -23,6 +23,7 @@ type HeroProps = {
 const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [bids, setBids] = useState<Bid[]>(initialBids);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [userBids, setUserBids] = useState<UserBids[]>([]);
     const [newBids, setNewBids] = useState<Bid[]>([]);
 
     useEffect(() => {
@@ -39,6 +40,19 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
 
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        const getUserBids = async () => {
+            try {
+                const userBids = await fetchUserBids(['0xD07D389EAb22F37F17a82AA139402b90B33dBFa0']);
+                console.log("User bids:", userBids[0].participatedAuctions);
+                setUserBids(userBids);
+            } catch (e) {
+                console.error("Failed to fetch user bids:", e);
+            }
+        }
+        getUserBids();
+    }, [])
 
     const onBidHandler = async (auctionId: string, price: string, encodedOrderId: string) => {
         try {
@@ -85,6 +99,20 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         currentPage * PAGE_SIZE
     );
 
+    const hasUserAlreadyBid = (auctionId: string, token: string) => {
+        const hasBid = userBids.some((userBid) =>
+            userBid.participatedAuctions.some(
+                (auction) => {
+                    console.log(auction.auctioningToken.id, token);
+                    const match = auction.auctioningToken.id === token && auction.auctionId === auctionId;
+                    return match;
+                }
+            )
+        );
+        console.log(hasBid, userBids);
+        return hasBid;
+    };
+
     return (
         <div className="px-4 md:px-20 font-rubik">
             <div className="overflow-x-auto">
@@ -101,6 +129,11 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                     <tbody className="bg-black">
                         {paginatedBids.map((bid) => {
                             const isNewBid = newBids.some(newBid => newBid.encodedOrderId === bid.encodedOrderId);
+
+                            const userHasAlreadyBid = hasUserAlreadyBid(
+                                bid.auctionId ?? "",
+                                bid.auctioningToken ?? ""
+                            );
 
                             return (
                                 <motion.tr
@@ -160,9 +193,14 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-[#767676]">{formatRelativeTime(Number(bid.timestamp))}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <button onClick={() => onBidHandler(bid.auctionId ?? '', bid.price, bid.encodedOrderId)} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
-                                            Bid
-                                        </button>
+                                        {userHasAlreadyBid ? (
+                                            <button className="text-sm text-[white] bg-[#f65b58] rounded-full px-4 py-2">
+                                                Cancel Bid
+                                            </button>) : (
+                                            <button onClick={() => onBidHandler(bid.auctionId ?? '', bid.price, bid.encodedOrderId)} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
+                                                Bid
+                                            </button>)
+                                        }
                                     </td>
                                 </motion.tr>
                             );
@@ -171,7 +209,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                 </table>
             </div>
             <Paginate currentPage={Number(currentPage) ?? 1} totalBids={totalBids} PAGE_SIZE={PAGE_SIZE} setCurrentPage={setCurrentPage} />
-        </div>
+        </div >
     );
 };
 
