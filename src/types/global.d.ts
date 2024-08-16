@@ -63,24 +63,32 @@ interface Bid {
 }
 
 interface TokenLockWallet {
-    beneficiary: string;
+    beneficiary?: string;
     address: string;
 }
 
 interface MyQueryResponse {
     tokenLockWallets: TokenLockWallet[];
 }
+interface Order {
+    buyAmount: string;
+    sellAmount: string;
+    price: string;
+    status: string;
+    timestamp: string;
+    txHash: string;
+    auctionId: string;
+}
 
-interface UserBids {
-    address: string;
-    participatedAuctions: {
-        auctionId: string;
-        auctioningToken: {
-            id: string;
-            symbol: string;
-            decimals: number;
-        };
-        txHash: string;
-    }[];
+interface User {
+    orders: Order[];
+}
+
+interface UsersResponse {
+    users: User[];
+}
+
+interface TokenLockWalletsResponse {
+    tokenLockWallets: TokenLockWallet[];
 }
 

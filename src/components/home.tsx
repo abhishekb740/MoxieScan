@@ -11,7 +11,6 @@ import { fetchAuctionsWithBids, fetchUserBids } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const PAGE_SIZE = 9;
 
@@ -24,7 +23,7 @@ type HeroProps = {
 const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [bids, setBids] = useState<Bid[]>(initialBids);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [userBids, setUserBids] = useState<UserBids[]>([]);
+    const [userBids, setUserBids] = useState<User[]>([]);
     const [newBids, setNewBids] = useState<Bid[]>([]);
 
     useEffect(() => {
@@ -45,8 +44,8 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     useEffect(() => {
         const getUserBids = async () => {
             try {
-                const userBids = await fetchUserBids(['0xD07D389EAb22F37F17a82AA139402b90B33dBFa0']);
-                console.log("User bids:", userBids[0].participatedAuctions);
+                const userBids = await fetchUserBids('0xD07D389EAb22F37F17a82AA139402b90B33dBFa0');
+                console.log("User bids:", userBids);
                 setUserBids(userBids);
             } catch (e) {
                 console.error("Failed to fetch user bids:", e);
@@ -57,7 +56,6 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
 
     const onBidHandler = async (auctionId: string, price: string, encodedOrderId: string) => {
         try {
-            console.log("Bidding on a fan token:", auctionId);
             const provider = new ethers.providers.Web3Provider(window.ethereum!);
             const signer = provider.getSigner();
             const auctionContract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
@@ -90,6 +88,15 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         }
     };
 
+    const onCancelBidHandler = async (auctionId: string, encodedOrderId: string) => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum!);
+        const signer = provider.getSigner();
+        const auctionContract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
+        const tx = await auctionContract.populateTransaction.cancelSellOrders(auctionId, [encodedOrderId]);
+        const response = await signer.sendTransaction(tx);
+        const receipt = await response.wait();
+        console.log('Transaction successful:', receipt);
+    }
 
     const formatRelativeTime = (timestamp: number) => {
         return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });
@@ -100,19 +107,15 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         currentPage * PAGE_SIZE
     );
 
-    const hasUserAlreadyBid = (auctionId: string, token: string) => {
-        const hasBid = userBids.some((userBid) =>
-            userBid.participatedAuctions.some(
-                (auction) => {
-                    console.log(auction.auctioningToken.id, token);
-                    const match = auction.auctioningToken.id === token && auction.auctionId === auctionId;
-                    return match;
-                }
+    const hasUserAlreadyBid = (auctionId: string) => {
+        return userBids.some((userBid) =>
+            userBid.orders.some(
+                (order) =>
+                    order.auctionId === auctionId
             )
         );
-        console.log(hasBid, userBids);
-        return hasBid;
     };
+
 
     return (
         <div className="px-4 md:px-20 font-rubik">
@@ -128,17 +131,16 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                         </tr>
                     </thead>
                     <tbody className="bg-black">
-                        {paginatedBids.map((bid) => {
+                        {paginatedBids.map((bid, i) => {
                             const isNewBid = newBids.some(newBid => newBid.encodedOrderId === bid.encodedOrderId);
 
                             const userHasAlreadyBid = hasUserAlreadyBid(
-                                bid.auctionId ?? "",
-                                bid.auctioningToken ?? ""
+                                bid.auctionId ?? ""
                             );
 
                             return (
                                 <motion.tr
-                                    key={bid.encodedOrderId}
+                                    key={i}
                                     initial={{ scale: 0, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0, opacity: 0 }}
@@ -195,7 +197,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                     <td className="px-6 py-4 whitespace-nowrap text-[#767676]">{formatRelativeTime(Number(bid.timestamp))}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {userHasAlreadyBid ? (
-                                            <button className="text-sm text-[white] bg-[#f65b58] rounded-full px-4 py-2">
+                                            <button onClick={() => onCancelBidHandler(bid.auctionId ?? '', bid.encodedOrderId)} className="text-sm text-[white] bg-[#f65b58] rounded-full px-4 py-2">
                                                 Cancel Bid
                                             </button>) : (
                                             <button onClick={() => onBidHandler(bid.auctionId ?? '', bid.price, bid.encodedOrderId)} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">

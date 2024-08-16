@@ -276,35 +276,97 @@ export const fetchMoxiePrice = async () => {
   return price;
 };
 
-export const fetchUserBids = async (userAddresses: string[]): Promise<UserBids[]> => {
+export const fetchUserBids = async (userAddresses: string) => {
+
   const graphQLClient = new GraphQLClient(
     "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
   );
 
-  const query = gql`
-    query MyQuery($userAddresses: [Bytes!]) {
-      users(where: { address_in: $userAddresses }) {
-        participatedAuctions {
-          auctionId
-          auctioningToken {
-            id
-            symbol
-            decimals
-          }
-          txHash
-        }
-        address
+  const query = gql`query MyQuery($userAddresses: [Bytes!]) {
+    users(where: {address_in: $userAddresses}) {
+      orders(where: {status: Placed}) {
+        buyAmount
+        sellAmount
+        price
+        status
+        timestamp
+        txHash
+        auctionId
       }
     }
+  }
   `;
 
-  const variables = { userAddresses };
+  const vestingAddress = await fetchUsersVestingContract(userAddresses);
+
+  const variable = {
+    "userAddresses": [
+      userAddresses,
+      vestingAddress
+    ]
+  }
 
   try {
-    const data = await graphQLClient.request<{ users: UserBids[] }>(query, variables);
+    const data = await graphQLClient.request<UsersResponse>(query, variable);
     return data.users;
   } catch (e) {
     throw new Error(`fetchUserBids: ${(e as Error).message}`);
   }
-};
+}
+
+const fetchUsersVestingContract = async (userAddress: string) => {
+  const graphQLClient = new GraphQLClient(
+    "https://api.studio.thegraph.com/query/23537/moxie_vesting_mainnet/version/latest"
+  );
+
+  const query = gql`query MyQuery($beneficiary: Bytes) {
+    tokenLockWallets(where: {beneficiary: $beneficiary}) {
+      address: id
+    }
+  }`;
+
+  const variable = {
+    "beneficiary": userAddress
+  }
+
+
+  try {
+    const data = await graphQLClient.request<TokenLockWalletsResponse>(query, variable);
+    return data.tokenLockWallets[0].address;
+  } catch (e) {
+    throw new Error(`fetchUserBids: ${(e as Error).message}`);
+  }
+}
+
+// export const fetchUserBids = async (userAddresses: string[]): Promise<UserBids[]> => {
+//   const graphQLClient = new GraphQLClient(
+//     "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
+//   );
+
+//   const query = gql`
+//     query MyQuery($userAddresses: [Bytes!]) {
+//       users(where: { address_in: $userAddresses }) {
+//         participatedAuctions {
+//           auctionId
+//           auctioningToken {
+//             id
+//             symbol
+//             decimals
+//           }
+//           txHash
+//         }
+//         address
+//       }
+//     }
+//   `;
+
+//   const variables = { userAddresses };
+
+//   try {
+//     const data = await graphQLClient.request<{ users: UserBids[] }>(query, variables);
+//     return data.users;
+//   } catch (e) {
+//     throw new Error(`fetchUserBids: ${(e as Error).message}`);
+//   }
+// };
 
