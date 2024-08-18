@@ -11,7 +11,7 @@ import { fetchAuctionsWithBids, fetchUserBids } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
-import Modal from "./Modal";
+import Modal from "./Modal/Modal";
 
 const PAGE_SIZE = 9;
 
