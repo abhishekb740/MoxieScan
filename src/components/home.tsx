@@ -11,6 +11,7 @@ import { fetchAuctionsWithBids, fetchUserBids } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
+import Modal from "./Modal";
 
 const PAGE_SIZE = 9;
 
@@ -25,6 +26,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [userBids, setUserBids] = useState<User[]>([]);
     const [newBids, setNewBids] = useState<Bid[]>([]);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -116,9 +118,25 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         );
     };
 
+    let testModalProps = {
+        fanName: "Jesse Pollock",
+        fanImage: "https://wrpcd.net/cdn-cgi/imagedelivery/BXluQx4ige9GuW0Ia56BHw/1013b0f6-1bf4-4f4e-15fb-34be06fede00/anim=false,fit=contain,f=auto,w=336",
+        fanFc: "0x123456789",
+        fanMoxieEarned: 76749.435,
+        moxieBalance: 5000,
+        fanEarningsShared: 50,
+        fanTokensAvailable: 42535,
+        fanNumberOfBids: 5,
+        fanHighestBid: 100,
+        fanClearingPrice: 5.46,
+        setShowModal: setShowModal
+    }
 
     return (
         <div className="px-4 md:px-20 font-rubik">
+            {
+                showModal && <Modal {...testModalProps} />
+            }
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-black text-white">
                     <thead className="py-4 border-b border-[#CBD5E11F] border-opacity-10">
