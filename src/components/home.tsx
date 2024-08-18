@@ -29,7 +29,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [userBids, setUserBids] = useState<User[]>([]);
     const [newBids, setNewBids] = useState<Bid[]>([]);
-    const [showModal, setShowModal] = useState(true);
+    const [showModal, setShowModal] = useState(false);
     const account = useAccount({
         config,
     })
