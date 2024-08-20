@@ -7,7 +7,7 @@ import Link from "next/link";
 import Paginate from "./pagination/Paginate";
 import Farcaster from "@/icons/Farcaster"
 import { formatNumber } from "@/utils/helpers"
-import { fetchAuctionsWithBids, fetchUserBids } from "@/app/_actions/queries";
+import { fetchAuctionsWithBids, fetchUserBids, fetchCertainAuctionDetails, fetchUsersLifetimeMoxieEarned, fetchClearingPriceForAFanToken } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
@@ -75,6 +75,10 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         }
 
         try {
+
+            const auctionDetails = await fetchCertainAuctionDetails(auctionId); 
+            console.log(auctionDetails);
+
             const provider = new ethers.providers.Web3Provider(window.ethereum!);
             const signer = provider.getSigner();
             const auctionContract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);

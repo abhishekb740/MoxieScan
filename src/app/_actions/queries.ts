@@ -338,35 +338,109 @@ const fetchUsersVestingContract = async (userAddress: string) => {
   }
 }
 
-// export const fetchUserBids = async (userAddresses: string[]): Promise<UserBids[]> => {
-//   const graphQLClient = new GraphQLClient(
-//     "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
-//   );
+export const fetchCertainAuctionDetails = async (auctionId: string): Promise<AuctionDetailsResponse | null> => {
+  const graphQLClient = new GraphQLClient(
+    "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
+  );
 
-//   const query = gql`
-//     query MyQuery($userAddresses: [Bytes!]) {
-//       users(where: { address_in: $userAddresses }) {
-//         participatedAuctions {
-//           auctionId
-//           auctioningToken {
-//             id
-//             symbol
-//             decimals
-//           }
-//           txHash
-//         }
-//         address
-//       }
-//     }
-//   `;
+  const query = gql`
+  query MyQuery($auctionId: BigInt!) {
+    auctionDetails(where: { auctionId: $auctionId }) {
+      auctionId
+      allowListManager
+      allowListSigner
+      auctionEndDate
+      currentBiddingAmount
+      currentClearingOrderBuyAmount
+      currentClearingOrderSellAmount
+      currentClearingPrice
+      currentVolume
+      interestScore
+      isAtomicClosureAllowed
+      isCleared
+      isPrivateAuction
+      minFundingThreshold
+      minimumBiddingAmountPerOrder
+      orderCancellationEndDate
+      startingTimeStamp
+      totalOrders
+      txHash
+      uniqueBidders
+      minBuyAmount
+    }
+  }`;
 
-//   const variables = { userAddresses };
+  const variable = {
+    auctionId,
+  };
 
-//   try {
-//     const data = await graphQLClient.request<{ users: UserBids[] }>(query, variables);
-//     return data.users;
-//   } catch (e) {
-//     throw new Error(`fetchUserBids: ${(e as Error).message}`);
-//   }
-// };
+  try {
+    const data: AuctionDetailsResponse = await graphQLClient.request(query, variable);
+    console.log(data);
+    return data;
+  } catch (e) {
+    console.error(`fetchCertainAuctionDetails: ${(e as Error).message}`);
+    return null;
+  }
+};
 
+
+export const fetchUsersLifetimeMoxieEarned = async (fid: string): Promise<number | null> => {
+  const query = `query MyQuery { 
+                  FarcasterMoxieEarningStats(
+                      input: {filter: {entityType: {_eq: USER}, entityId: {_eq: "${fid}"}}, timeframe: LIFETIME, blockchain: ALL}
+                    ) {
+                    FarcasterMoxieEarningStat {
+                      allEarningsAmount
+                    }
+                  }
+                }`;
+
+  try {
+    const response = await fetch("https://api.airstack.xyz/gql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: process.env.AIRSTACK_API_KEY!,
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user's lifetime Moxie earnings. Status: ${response.status}`);
+    }
+
+    const { data }: LifetimeMoxieEarningsResponse = await response.json();
+    console.log(data.FarcasterMoxieEarningStats.FarcasterMoxieEarningStat[0]?.allEarningsAmount);
+    const earnings = data?.FarcasterMoxieEarningStats.FarcasterMoxieEarningStat[0]?.allEarningsAmount;
+    return earnings ? parseFloat(earnings) : null;
+  } catch (e) {
+    console.error(`fetchUsersLifetimeMoxieEarned: ${(e as Error).message}`);
+    return null;
+  }
+};
+
+
+export const fetchClearingPriceForAFanToken = async (auctionId: string): Promise<ClearingPriceResponse | null> => {
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  };
+
+  try {
+    const res = await fetch(`https://batch-auction.airstack.xyz/api/clearing-price?auctionId=${auctionId}&chainId=8453`, options);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch clearing price. Status: ${res.status}`);
+    }
+
+    const data: ClearingPriceResponse = await res.json();
+    console.log(data);
+    return data;
+  } catch (e) {
+    console.error(`fetchClearingPriceForAFanToken: ${(e as Error).message}`);
+    return null;
+  }
+};

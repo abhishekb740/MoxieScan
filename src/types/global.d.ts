@@ -92,3 +92,45 @@ interface TokenLockWalletsResponse {
     tokenLockWallets: TokenLockWallet[];
 }
 
+type ClearingPriceResponse = {
+    clearingPrice: string;
+    auctionId: string;
+    chainId: string;
+};
+
+type LifetimeMoxieEarningsResponse = {
+    data: {
+        FarcasterMoxieEarningStats: {
+            FarcasterMoxieEarningStat: {
+                allEarningsAmount: string;
+            }[];
+        };
+    };
+};
+
+type AuctionDetailsResponse = {
+    auctionDetails: {
+        auctionId: string;
+        allowListManager: string;
+        allowListSigner: string;
+        auctionEndDate: string;
+        currentBiddingAmount: string;
+        currentClearingOrderBuyAmount: string;
+        currentClearingOrderSellAmount: string;
+        currentClearingPrice: string;
+        currentVolume: string;
+        interestScore: string;
+        isAtomicClosureAllowed: boolean;
+        isCleared: boolean;
+        isPrivateAuction: boolean;
+        minFundingThreshold: string;
+        minimumBiddingAmountPerOrder: string;
+        orderCancellationEndDate: string;
+        startingTimeStamp: string;
+        totalOrders: string;
+        txHash: string;
+        uniqueBidders: string;
+        minBuyAmount: string;
+    }[];
+};
+
