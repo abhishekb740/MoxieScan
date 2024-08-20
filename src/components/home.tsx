@@ -12,6 +12,9 @@ import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
 import Modal from "./Modal/Modal";
+import { useAccount } from 'wagmi';
+import { config } from "@/app/wagmi";
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 const PAGE_SIZE = 9;
 
@@ -27,6 +30,10 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [userBids, setUserBids] = useState<User[]>([]);
     const [newBids, setNewBids] = useState<Bid[]>([]);
     const [showModal, setShowModal] = useState(false);
+    const account = useAccount({
+        config,
+    })
+    const { openConnectModal } = useConnectModal();
 
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -45,18 +52,28 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
 
     useEffect(() => {
         const getUserBids = async () => {
-            try {
-                const userBids = await fetchUserBids('0xD07D389EAb22F37F17a82AA139402b90B33dBFa0');
-                console.log("User bids:", userBids);
-                setUserBids(userBids);
-            } catch (e) {
-                console.error("Failed to fetch user bids:", e);
+            if (account.address) {
+                try {
+                    const userBids = await fetchUserBids(account.address);
+                    if (userBids.length > 0) {
+                        setUserBids(userBids);
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch user bids:", e);
+                }
             }
-        }
+        };
         getUserBids();
     }, [])
 
     const onBidHandler = async (auctionId: string, price: string, encodedOrderId: string) => {
+        if (!account.isConnected) {
+            if (openConnectModal) {
+                openConnectModal();
+            }
+            return;
+        }
+
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum!);
             const signer = provider.getSigner();
@@ -91,14 +108,25 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     };
 
     const onCancelBidHandler = async (auctionId: string, encodedOrderId: string) => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum!);
-        const signer = provider.getSigner();
-        const auctionContract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
-        const tx = await auctionContract.populateTransaction.cancelSellOrders(auctionId, [encodedOrderId]);
-        const response = await signer.sendTransaction(tx);
-        const receipt = await response.wait();
-        console.log('Transaction successful:', receipt);
-    }
+        if (!account.isConnected) {
+            if (openConnectModal) {
+                openConnectModal();
+            }
+            return;
+        }
+
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum!);
+            const signer = provider.getSigner();
+            const auctionContract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
+            const tx = await auctionContract.populateTransaction.cancelSellOrders(auctionId, [encodedOrderId]);
+            const response = await signer.sendTransaction(tx);
+            const receipt = await response.wait();
+            console.log('Transaction successful:', receipt);
+        } catch (error) {
+            console.error("Failed to cancel bid:", error);
+        }
+    };
 
     const formatRelativeTime = (timestamp: number) => {
         return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });
