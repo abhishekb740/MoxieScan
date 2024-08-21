@@ -7,7 +7,7 @@ import Link from "next/link";
 import Paginate from "./pagination/Paginate";
 import Farcaster from "@/icons/Farcaster"
 import { formatNumber } from "@/utils/helpers"
-import { fetchAuctionsWithBids, fetchUserBids, fetchCertainAuctionDetails, fetchUsersLifetimeMoxieEarned, fetchClearingPriceForAFanToken, fetchLiveAuctionFT } from "@/app/_actions/queries";
+import { fetchAuctionsWithBids, fetchUserBids, fetchLiveAuctionFT } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
@@ -45,6 +45,25 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                 const newBids = updatedBids.filter((bid) => !bids.some((b) => b.encodedOrderId === bid.encodedOrderId));
                 setNewBids(newBids);
                 setBids(updatedBids);
+                const getLiveAuctionFT = async () => {
+                    const res = await fetchLiveAuctionFT();
+                    console.log(res);
+                    setActiveFT(res);
+                }
+                getLiveAuctionFT();
+                const getUserBids = async () => {
+                    if (account.address) {
+                        try {
+                            const userBids = await fetchUserBids(account.address);
+                            if (userBids.length > 0) {
+                                setUserBids(userBids);
+                            }
+                        } catch (e) {
+                            console.error("Failed to fetch user bids:", e);
+                        }
+                    }
+                };
+                getUserBids();
             } catch (error) {
                 console.error("Failed to fetch bids:", error);
             }
@@ -52,31 +71,6 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
 
         return () => clearInterval(interval);
     }, []);
-
-    useEffect(() => {
-        const getUserBids = async () => {
-            if (account.address) {
-                try {
-                    const userBids = await fetchUserBids(account.address);
-                    if (userBids.length > 0) {
-                        setUserBids(userBids);
-                    }
-                } catch (e) {
-                    console.error("Failed to fetch user bids:", e);
-                }
-            }
-        };
-        getUserBids();
-    }, [])
-
-    useEffect(() => {
-        const getLiveAuctionFT = async () => {
-            const res = await fetchLiveAuctionFT();
-            console.log(res);
-            setActiveFT(res);
-        }
-        getLiveAuctionFT();
-    }, [])
 
     const onBidHandler = async (
         auctionId: string,
@@ -183,8 +177,8 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
             auction => auction.auctionId
         );
         console.log(typeof activeAuctionIds[0]);
-        for(let i=0;i<activeAuctionIds.length;i++){
-            if(activeAuctionIds[i]==auctionId){
+        for (let i = 0; i < activeAuctionIds.length; i++) {
+            if (activeAuctionIds[i] == auctionId) {
                 return true;
             }
         }
@@ -300,11 +294,11 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                             </button>) : (
                                             // () => onBidHandler(bid.auctionId ?? '', bid.price, bid.encodedOrderId)
                                             <button
-                                            onClick={isActiveFT ? () => ModalOpenHandler(bid) : undefined}
+                                                onClick={isActiveFT ? () => ModalOpenHandler(bid) : undefined}
                                                 className={`text-sm text-[white] ${isActiveFT ? 'bg-[#8658F6]' : 'bg-gray-400 cursor-not-allowed text-black font-bold'} rounded-full px-4 py-2`}
-                                                // disabled={!isActiveFT}
+                                            // disabled={!isActiveFT}
                                             >
-                                                {isActiveFT ? 'Bid' : 'Auction Ended' }
+                                                {isActiveFT ? 'Bid' : 'Auction Ended'}
                                             </button>)
                                         }
                                     </td>

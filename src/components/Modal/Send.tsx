@@ -116,7 +116,7 @@ const Send = ({
         </div>
       </div>
       <div className="flex flex-col items-start justify-start w-full gap-2">
-        <p className="text-white">What's your Total Budget?</p>
+        <p className="text-white">What&apos;s your Total Budget?</p>
         <div className="flex items-start justify-start border border-[#262626] bg-[#171717] rounded-xl w-full">
           <input
             type="number"

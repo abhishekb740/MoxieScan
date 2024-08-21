@@ -12,6 +12,7 @@ export default async function Home() {
     const data = await fetchAuctionsWithBids();
     data.sort((a, b) => b.timestamp - a.timestamp);
     const price = await fetchMoxiePrice();
+    
     return (
       <main className="flex min-h-screen flex-col">
         <div>
