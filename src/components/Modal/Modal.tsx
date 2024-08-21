@@ -4,7 +4,6 @@ import Send from "./Send";
 import Success from "./Success";
 import { fetchCertainAuctionDetails, fetchUsersLifetimeMoxieEarned, fetchClearingPriceForAFanToken, fetchAuctionOrders } from "@/app/_actions/queries";
 import { useEffect } from "react";
-import { set } from "date-fns";
 
 type ModalProps = {
   onBidHandler: (auctionId: string, encodedOrderId: string, _buyAmount: string, _sellAmount: string) => void;
