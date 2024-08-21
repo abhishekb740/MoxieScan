@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Farcaster from "@/icons/Farcaster";
 import Moxie from "@/icons/Moxie";
 import { formatWeiToEther } from "@/utils/helpers";
+import SkeletonLoader from "../loader/skeletonLoader";
 
 type SendProps = {
   auctionId: string;
@@ -21,6 +22,7 @@ type SendProps = {
   fanClearingPrice: number;
   setPricePerFanToken: (pricePerFanToken: string) => void;
   pricePerFanToken: string;
+  loading: boolean;
 };
 
 const Send = ({
@@ -41,6 +43,7 @@ const Send = ({
   fanNumberOfBids,
   fanHighestBid,
   fanClearingPrice,
+  loading
 }: SendProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -162,7 +165,7 @@ const Send = ({
               moxie earned all time
             </p>
             <p className="font-bold text-white text-2xl flex gap-4 items-center justify-center">
-              {fanMoxieEarned.toFixed(2)} <Moxie />
+              {loading ? <span className="animate-pulse bg-gray-700 rounded-full h-8 w-28 inline-block"></span> : fanMoxieEarned.toFixed(2)} <Moxie />
             </p>
           </div>
           <div className="w-full flex items-center justify-between gap-4 py-2">
@@ -178,25 +181,25 @@ const Send = ({
               fan tokens available
             </p>
             <p className="font-bold text-white text-2xl flex gap-4 items-center justify-center">
-              {formatWeiToEther(fanTokensAvailable)}
+              {loading ? <span className="animate-pulse bg-gray-700 rounded-full h-8 w-20 inline-block"></span> : formatWeiToEther(fanTokensAvailable)}
             </p>
           </div>
           <div className="w-full flex items-center justify-between gap-4 py-2 font-bold">
             <p className="uppercase text-[#737373] text-sm">Number of bids</p>
             <p className="text-white text-sm flex gap-4 items-center justify-center">
-              {fanNumberOfBids}
+              {loading ? <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span> : fanNumberOfBids}
             </p>
           </div>
           <div className="w-full flex items-center justify-between gap-4 py-2 font-bold">
             <p className="uppercase text-[#737373] text-sm">Highest Bid</p>
             <p className="text-white text-sm flex gap-4 items-center justify-center">
-              {fanHighestBid}
+              {loading ? <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span> : fanHighestBid}
             </p>
           </div>
           <div className="w-full flex items-center justify-between gap-4 py-2 font-bold">
             <p className="uppercase text-[#737373] text-sm">Clearing Price</p>
             <p className="text-white text-sm flex gap-4 items-center justify-center">
-              {fanClearingPrice.toFixed(2)}
+              {loading ? <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span> : fanClearingPrice.toFixed(2)}
             </p>
           </div>
         </div>

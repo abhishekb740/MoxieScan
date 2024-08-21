@@ -4,6 +4,7 @@ import Send from "./Send";
 import Success from "./Success";
 import { fetchCertainAuctionDetails, fetchUsersLifetimeMoxieEarned, fetchClearingPriceForAFanToken, fetchAuctionOrders } from "@/app/_actions/queries";
 import { useEffect } from "react";
+import { set } from "date-fns";
 
 type ModalProps = {
   onBidHandler: (auctionId: string, encodedOrderId: string, _buyAmount: string, _sellAmount: string) => void;
@@ -36,25 +37,33 @@ const Modal = ({
   const [clearingPriceDetails, setClearingPriceDetails] = useState<ClearingPriceResponse | null>(null);
   const [lifetimeMoxieEarned, setLifetimeMoxieEarned] = useState<number>(0);
   const [encodedOrderId, setEncodedOrderId] = useState<string>('');
-  console.log(currentBid?.auctionId)
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const fetchDetails = async (auctionId: string) => {
-      const auctionOrders = await fetchAuctionOrders(auctionId, currentBid?.price ?? '0');
-      if(auctionOrders?.length > 0) {
-        setEncodedOrderId(auctionOrders[0].encodedOrderId);
+      try {
+        setLoading(true);
+        const auctionOrders = await fetchAuctionOrders(auctionId, currentBid?.price ?? '0');
+        if (auctionOrders?.length > 0) {
+          setEncodedOrderId(auctionOrders[0].encodedOrderId);
+        } else {
+          setEncodedOrderId('0x0000000000000000000000000000000000000000000000000000000000000001');
+        }
+        const auctionDetails = await fetchCertainAuctionDetails(auctionId);
+        setFTDetails(auctionDetails);
+        const clearingPrice = await fetchClearingPriceForAFanToken(auctionId);
+        setClearingPriceDetails(clearingPrice);
+        const lifetimeMoxieEarned = await fetchUsersLifetimeMoxieEarned(
+          (currentBid?.isFid ? currentBid?.FTfid : currentBid?.channelId) ?? '',
+          currentBid?.isFid ?? false
+        );
+        setLifetimeMoxieEarned(lifetimeMoxieEarned ?? 0);
+      } finally {
+        setLoading(false);
       }
-      else{
-        setEncodedOrderId('0x0000000000000000000000000000000000000000000000000000000000000001');
-      }
-      const auctionDetails = await fetchCertainAuctionDetails(auctionId);
-      setFTDetails(auctionDetails);
-      const clearingPrice = await fetchClearingPriceForAFanToken(auctionId);
-      setClearingPriceDetails(clearingPrice);
-      const lifetimeMoxieEarned = await fetchUsersLifetimeMoxieEarned((currentBid?.isFid ? currentBid?.FTfid : currentBid?.channelId) ?? '', currentBid?.isFid ?? false);
-      setLifetimeMoxieEarned(lifetimeMoxieEarned ?? 0);
-    }
+    };
     fetchDetails(currentBid?.auctionId ?? '');
-  }, [])
+  }, [currentBid?.auctionId, currentBid?.price, currentBid?.isFid, currentBid?.FTfid, currentBid?.channelId]);
 
   return (
     <>
@@ -113,6 +122,7 @@ const Modal = ({
                 bidAmount={bidAmount}
                 setBidAmount={setBidAmount}
                 setBid={setBid}
+                loading={loading}
               />
             )}
           </div>
