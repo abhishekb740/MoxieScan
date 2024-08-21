@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Farcaster from "@/icons/Farcaster";
 import Moxie from "@/icons/Moxie";
 import { formatWeiToEther } from "@/utils/helpers";
-import SkeletonLoader from "../loader/skeletonLoader";
 
 type SendProps = {
   auctionId: string;
