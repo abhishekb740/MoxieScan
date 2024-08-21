@@ -7,7 +7,7 @@ import Link from "next/link";
 import Paginate from "./pagination/Paginate";
 import Farcaster from "@/icons/Farcaster"
 import { formatNumber } from "@/utils/helpers"
-import { fetchAuctionsWithBids, fetchUserBids, fetchCertainAuctionDetails, fetchUsersLifetimeMoxieEarned, fetchClearingPriceForAFanToken } from "@/app/_actions/queries";
+import { fetchAuctionsWithBids, fetchUserBids, fetchCertainAuctionDetails, fetchUsersLifetimeMoxieEarned, fetchClearingPriceForAFanToken, fetchLiveAuctionFT } from "@/app/_actions/queries";
 import BaseABIAndAddress from "@/deployments/base/EasyAuction.json";
 import { motion } from "framer-motion";
 import { ethers } from "ethers";
@@ -30,6 +30,9 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     const [userBids, setUserBids] = useState<User[]>([]);
     const [newBids, setNewBids] = useState<Bid[]>([]);
     const [showModal, setShowModal] = useState(false);
+    const [currentBid, setCurrentBid] = useState<Bid | null>(null);
+    const [activeFT, setActiveFT] = useState<FarcasterFanTokenAuctionsResponse>();
+
     const account = useAccount({
         config,
     })
@@ -66,7 +69,21 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         getUserBids();
     }, [])
 
-    const onBidHandler = async (auctionId: string, price: string, encodedOrderId: string) => {
+    useEffect(() => {
+        const getLiveAuctionFT = async () => {
+            const res = await fetchLiveAuctionFT();
+            console.log(res);
+            setActiveFT(res);
+        }
+        getLiveAuctionFT();
+    }, [])
+
+    const onBidHandler = async (
+        auctionId: string,
+        encodedOrderId: string,
+        _buyAmount: string,
+        _sellAmount: string
+    ): Promise<ethers.providers.TransactionReceipt | undefined> => {
         if (!account.isConnected) {
             if (openConnectModal) {
                 openConnectModal();
@@ -75,20 +92,18 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         }
 
         try {
-
-            const auctionDetails = await fetchCertainAuctionDetails(auctionId); 
-            console.log(auctionDetails);
-
             const provider = new ethers.providers.Web3Provider(window.ethereum!);
             const signer = provider.getSigner();
             const auctionContract = new ethers.Contract(BaseABIAndAddress.address, BaseABIAndAddress.abi, signer);
             const biddingTokenAddress = "0x8C9037D1Ef5c6D1f6816278C7AAF5491d24CD527";
-            const biddingTokenContract = new ethers.Contract(biddingTokenAddress, [
-                "function approve(address spender, uint256 amount) external returns (bool)"
-            ], signer);
+            const biddingTokenContract = new ethers.Contract(
+                biddingTokenAddress,
+                ["function approve(address spender, uint256 amount) external returns (bool)"],
+                signer
+            );
 
-            const buyAmount = ethers.utils.parseUnits("100", 18);
-            const sellAmount = ethers.utils.parseUnits("200", 18);
+            const buyAmount = ethers.utils.parseUnits(_buyAmount, 18);
+            const sellAmount = ethers.utils.parseUnits(_sellAmount, 18);
 
             const approveTx = await biddingTokenContract.approve(BaseABIAndAddress.address, sellAmount);
             await approveTx.wait();
@@ -103,13 +118,22 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
             );
 
             const response = await signer.sendTransaction(tx);
-
             const receipt = await response.wait();
+
+            if (receipt.status === 0) {
+                throw new Error("Transaction failed");
+            }
+
             console.log('Transaction successful:', receipt);
+            return receipt;
+
         } catch (error) {
             console.error("Failed to bid on a fan token:", error);
+            throw error;
         }
     };
+
+
 
     const onCancelBidHandler = async (auctionId: string, encodedOrderId: string) => {
         if (!account.isConnected) {
@@ -150,6 +174,23 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         );
     };
 
+    const isAFTAuctionActive = (auctionId: string) => {
+        console.log(typeof auctionId);
+        if (!activeFT || !activeFT.FarcasterFanTokenAuctions || !activeFT.FarcasterFanTokenAuctions.FarcasterFanTokenAuction) {
+            return false;
+        }
+        const activeAuctionIds = activeFT.FarcasterFanTokenAuctions.FarcasterFanTokenAuction.map(
+            auction => auction.auctionId
+        );
+        console.log(typeof activeAuctionIds[0]);
+        for(let i=0;i<activeAuctionIds.length;i++){
+            if(activeAuctionIds[i]==auctionId){
+                return true;
+            }
+        }
+    };
+
+
     let testModalProps = {
         fanName: "Jesse Pollock",
         fanImage: "https://wrpcd.net/cdn-cgi/imagedelivery/BXluQx4ige9GuW0Ia56BHw/1013b0f6-1bf4-4f4e-15fb-34be06fede00/anim=false,fit=contain,f=auto,w=336",
@@ -160,14 +201,18 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
         fanTokensAvailable: 42535,
         fanNumberOfBids: 5,
         fanHighestBid: 100,
-        fanClearingPrice: 5.46,
         setShowModal: setShowModal
     }
+
+    const ModalOpenHandler = (bid: Bid) => {
+        setShowModal(true);
+        setCurrentBid(bid);
+    };
 
     return (
         <div className="px-4 md:px-20 font-rubik">
             {
-                showModal && <Modal {...testModalProps} />
+                showModal && <Modal currentBid={currentBid} {...testModalProps} onBidHandler={onBidHandler} />
             }
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-black text-white">
@@ -187,6 +232,9 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                             const userHasAlreadyBid = hasUserAlreadyBid(
                                 bid.auctionId ?? ""
                             );
+
+                            const isActiveFT = isAFTAuctionActive(bid.auctionId ?? "");
+                            console.log(isActiveFT);
 
                             return (
                                 <motion.tr
@@ -250,8 +298,13 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                                             <button onClick={() => onCancelBidHandler(bid.auctionId ?? '', bid.encodedOrderId)} className="text-sm text-[white] bg-[#f65b58] rounded-full px-4 py-2">
                                                 Cancel Bid
                                             </button>) : (
-                                            <button onClick={() => onBidHandler(bid.auctionId ?? '', bid.price, bid.encodedOrderId)} className="text-sm text-[white] bg-[#8658F6] rounded-full px-4 py-2">
-                                                Bid
+                                            // () => onBidHandler(bid.auctionId ?? '', bid.price, bid.encodedOrderId)
+                                            <button
+                                            onClick={isActiveFT ? () => ModalOpenHandler(bid) : undefined}
+                                                className={`text-sm text-[white] ${isActiveFT ? 'bg-[#8658F6]' : 'bg-gray-400 cursor-not-allowed text-black font-bold'} rounded-full px-4 py-2`}
+                                                // disabled={!isActiveFT}
+                                            >
+                                                {isActiveFT ? 'Bid' : 'Auction Ended' }
                                             </button>)
                                         }
                                     </td>

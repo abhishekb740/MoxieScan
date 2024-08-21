@@ -9,7 +9,7 @@ const Farcaster = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width="20" height="20" rx="8" fill="#824CEE" fill-opacity="0.16" />
+      <rect width="20" height="20" rx="8" fill="#824CEE" fillOpacity="0.16" />
       <path
         d="M6.06512 4.51025H13.7862V15.4898H12.6529V10.4605H12.6417C12.5165 9.07046 11.3483 7.98121 9.92568 7.98121C8.50307 7.98121 7.33488 9.07046 7.20962 10.4605H7.1985V15.4898H6.06512V4.51025Z"
         fill="#824CEE"

@@ -54,12 +54,13 @@ interface Bid {
     volume: string;
     auctioningToken?: string;
     auctionId?: string;
-    profileName?: string | null;
+    profileName?: string;
     profileImage?: string | null;
     tokenProfileImage?: string | null;
     tokenProfileName?: string | null;
     isFid?: boolean;
     channelId?: string | null;
+    FTfid: string | null;
 }
 
 interface TokenLockWallet {
@@ -92,10 +93,16 @@ interface TokenLockWalletsResponse {
     tokenLockWallets: TokenLockWallet[];
 }
 
-type ClearingPriceResponse = {
-    clearingPrice: string;
-    auctionId: string;
-    chainId: string;
+interface ClearingPriceResponse {
+    auction: {
+        clearingPrice: number;
+        auctionSupply: string;
+        clearingPriceBuyAmount: string;
+        clearingPriceSellAmount: string;
+        id: string;
+        minBuyAmount: string;
+        userId: string;
+    }
 };
 
 type LifetimeMoxieEarningsResponse = {
@@ -133,4 +140,39 @@ type AuctionDetailsResponse = {
         minBuyAmount: string;
     }[];
 };
+
+interface AuctionOrders {
+    buyAmount: string;
+    sellAmount: string;
+    price: string;
+    encodedOrderId: string;
+    user: {
+        address: string;
+        id: string;
+    }
+}
+
+interface FarcasterFanTokenAuction {
+    auctionId: string;
+    auctionSupply: number;  
+    decimals: number;
+    entityId: string;
+    entityName: string;
+    entitySymbol: string;
+    entityType: 'USER' | 'CHANNEL';
+    estimatedEndTimestamp: string;
+    estimatedStartTimestamp: string;
+    launchCastUrl: string;
+    minBiddingAmount: string;
+    minFundingAmount: string;
+    minPriceInMoxie: string;
+    subjectAddress: string;
+}
+
+interface FarcasterFanTokenAuctionsResponse {
+    FarcasterFanTokenAuctions: {
+        FarcasterFanTokenAuction: FarcasterFanTokenAuction[];
+    };
+}
+
 

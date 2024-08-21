@@ -131,6 +131,7 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
       let tokenProfileName = tokenDetail.symbol;
       let tokenProfileImage = null;
       let channelId = null;
+      let FTfid = null;
       let isFid = false;
 
       if (tokenDetail.symbol.startsWith('cid:')) {
@@ -152,6 +153,7 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
           if (userDetail) {
             tokenProfileName = userDetail.profileName;
             tokenProfileImage = userDetail.profileImage;
+            FTfid = fid;
             isFid = true;
           }
         } catch (e) {
@@ -159,7 +161,7 @@ export const fetchAuctionsWithBids = async (): Promise<Bid[]> => {
         }
       }
 
-      return { ...bid, tokenProfileName, tokenProfileImage, isFid, channelId };
+      return { ...bid, tokenProfileName, tokenProfileImage, isFid, channelId, FTfid };
     }));
 
     const bidsWithProfileNames = await Promise.all(bidsWithDetails.map(async (bid) => {
@@ -376,7 +378,6 @@ export const fetchCertainAuctionDetails = async (auctionId: string): Promise<Auc
 
   try {
     const data: AuctionDetailsResponse = await graphQLClient.request(query, variable);
-    console.log(data);
     return data;
   } catch (e) {
     console.error(`fetchCertainAuctionDetails: ${(e as Error).message}`);
@@ -385,8 +386,8 @@ export const fetchCertainAuctionDetails = async (auctionId: string): Promise<Auc
 };
 
 
-export const fetchUsersLifetimeMoxieEarned = async (fid: string): Promise<number | null> => {
-  const query = `query MyQuery { 
+export const fetchUsersLifetimeMoxieEarned = async (fid: string, isFid: boolean): Promise<number | null> => {
+  const UserQuery = `query MyQuery { 
                   FarcasterMoxieEarningStats(
                       input: {filter: {entityType: {_eq: USER}, entityId: {_eq: "${fid}"}}, timeframe: LIFETIME, blockchain: ALL}
                     ) {
@@ -395,6 +396,19 @@ export const fetchUsersLifetimeMoxieEarned = async (fid: string): Promise<number
                     }
                   }
                 }`;
+
+  const ChannelQuery = `query MyQuery {
+                FarcasterMoxieEarningStats(
+                  input: {filter: {entityType: {_eq: CHANNEL}, entityId: {_eq: "${fid}"}}, timeframe: LIFETIME, blockchain: ALL}
+                ) {
+                  FarcasterMoxieEarningStat {
+                    allEarningsAmount
+                  }
+                }
+              }`
+
+
+  const query = isFid ? UserQuery : ChannelQuery;
 
   try {
     const response = await fetch("https://api.airstack.xyz/gql", {
@@ -411,7 +425,6 @@ export const fetchUsersLifetimeMoxieEarned = async (fid: string): Promise<number
     }
 
     const { data }: LifetimeMoxieEarningsResponse = await response.json();
-    console.log(data.FarcasterMoxieEarningStats.FarcasterMoxieEarningStat[0]?.allEarningsAmount);
     const earnings = data?.FarcasterMoxieEarningStats.FarcasterMoxieEarningStat[0]?.allEarningsAmount;
     return earnings ? parseFloat(earnings) : null;
   } catch (e) {
@@ -437,10 +450,101 @@ export const fetchClearingPriceForAFanToken = async (auctionId: string): Promise
     }
 
     const data: ClearingPriceResponse = await res.json();
-    console.log(data);
     return data;
   } catch (e) {
     console.error(`fetchClearingPriceForAFanToken: ${(e as Error).message}`);
     return null;
   }
 };
+
+export const fetchAuctionOrders = async (auctionId: string, price: string) => {
+  console.log("fetchAuctionOrders", auctionId, price);
+  const query = gql`
+  query GetAuctionOrders($where: Order_filter, $orderBy: Order_orderBy, $orderDirection: OrderDirection, $first: Int) {
+    orders(
+      where: $where
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      first: $first
+    ) {
+      id
+      encodedOrderId
+      price
+      sellAmount
+      buyAmount
+      user {
+        id
+        address
+      }
+    }
+  }`;
+
+  const graphQLClient = new GraphQLClient(
+    "https://api.studio.thegraph.com/query/23537/moxie_auction_stats_mainnet/version/latest"
+  );
+
+  const variables = {
+    where: {
+      auction: String(auctionId),
+      price_gte: Number(price) + 1,
+      isExactOrder: false,
+    },
+    orderBy: "price",
+    orderDirection: "asc",
+    first: 1,
+  }
+
+  try {
+    const data = await graphQLClient.request<{ orders: AuctionOrders[] }>(query, variables);
+    console.log(data);
+    return data.orders;
+  } catch (e) {
+    throw new Error(`fetchAuctionsOrders: ${(e as Error).message}`);
+  }
+}
+
+export const fetchLiveAuctionFT = async () => {
+  const graphQLClient = new GraphQLClient(
+    "https://api.airstack.xyz/gql"
+  );
+
+  const query = gql`
+  query MyQuery($status: FarcasterFanTokenAuctionStatusType) {
+    FarcasterFanTokenAuctions(
+      input: {filter: {status: {_eq: $status}, entityType: {_in: [USER, CHANNEL]}}, blockchain: ALL, limit: 200}
+    ) {
+      FarcasterFanTokenAuction {
+        auctionId
+        auctionSupply
+        decimals
+        entityId
+        entityName
+        entitySymbol
+        entityType
+        estimatedEndTimestamp
+        estimatedStartTimestamp
+        launchCastUrl
+        minBiddingAmount
+        minFundingAmount
+        minPriceInMoxie
+        subjectAddress
+      }
+    }
+  }
+  `;
+
+  const variable = {
+    "status": "ACTIVE"
+  }
+
+  const headers = {
+    Authorization: process.env.AIRSTACK_API_KEY as string,
+  }
+
+  try {
+    const data = await graphQLClient.request<FarcasterFanTokenAuctionsResponse>(query, variable, headers);
+    return data;
+  } catch (e) {
+    throw new Error(`getLiveAuctionFT: ${(e as Error).message}`) ;
+  }
+}
