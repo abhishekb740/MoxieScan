@@ -458,7 +458,6 @@ export const fetchClearingPriceForAFanToken = async (auctionId: string): Promise
 };
 
 export const fetchAuctionOrders = async (auctionId: string, price: string) => {
-  console.log("fetchAuctionOrders", auctionId, price);
   const query = gql`
   query GetAuctionOrders($where: Order_filter, $orderBy: Order_orderBy, $orderDirection: OrderDirection, $first: Int) {
     orders(
@@ -496,7 +495,6 @@ export const fetchAuctionOrders = async (auctionId: string, price: string) => {
 
   try {
     const data = await graphQLClient.request<{ orders: AuctionOrders[] }>(query, variables);
-    console.log(data);
     return data.orders;
   } catch (e) {
     throw new Error(`fetchAuctionsOrders: ${(e as Error).message}`);

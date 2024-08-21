@@ -22,16 +22,16 @@ type HeroProps = {
     price: number;
     initialBids: Bid[];
     totalBids: number;
+    activeFT: FarcasterFanTokenAuctionsResponse;
 };
 
-const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
+const Hero = ({ price, initialBids, totalBids, activeFT }: HeroProps) => {
     const [bids, setBids] = useState<Bid[]>(initialBids);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [userBids, setUserBids] = useState<User[]>([]);
     const [newBids, setNewBids] = useState<Bid[]>([]);
     const [showModal, setShowModal] = useState(false);
     const [currentBid, setCurrentBid] = useState<Bid | null>(null);
-    const [activeFT, setActiveFT] = useState<FarcasterFanTokenAuctionsResponse>();
 
     const account = useAccount({
         config,
@@ -45,12 +45,6 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                 const newBids = updatedBids.filter((bid) => !bids.some((b) => b.encodedOrderId === bid.encodedOrderId));
                 setNewBids(newBids);
                 setBids(updatedBids);
-                const getLiveAuctionFT = async () => {
-                    const res = await fetchLiveAuctionFT();
-                    console.log(res);
-                    setActiveFT(res);
-                }
-                getLiveAuctionFT();
                 const getUserBids = async () => {
                     if (account.address) {
                         try {
@@ -169,14 +163,12 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
     };
 
     const isAFTAuctionActive = (auctionId: string) => {
-        console.log(typeof auctionId);
         if (!activeFT || !activeFT.FarcasterFanTokenAuctions || !activeFT.FarcasterFanTokenAuctions.FarcasterFanTokenAuction) {
             return false;
         }
         const activeAuctionIds = activeFT.FarcasterFanTokenAuctions.FarcasterFanTokenAuction.map(
             auction => auction.auctionId
         );
-        console.log(typeof activeAuctionIds[0]);
         for (let i = 0; i < activeAuctionIds.length; i++) {
             if (activeAuctionIds[i] == auctionId) {
                 return true;
@@ -226,10 +218,7 @@ const Hero = ({ price, initialBids, totalBids }: HeroProps) => {
                             const userHasAlreadyBid = hasUserAlreadyBid(
                                 bid.auctionId ?? ""
                             );
-
                             const isActiveFT = isAFTAuctionActive(bid.auctionId ?? "");
-                            console.log(isActiveFT);
-
                             return (
                                 <motion.tr
                                     key={i}

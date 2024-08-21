@@ -1,25 +1,25 @@
 import Navbar from "@/components/navbar";
-import { fetchAuctionsWithBids } from "@/app/_actions/queries";
+import { fetchAuctionsWithBids, fetchLiveAuctionFT } from "@/app/_actions/queries";
 import Hero from "@/components/home";
 import { fetchMoxiePrice } from "@/app/_actions/queries";
 
 export const fetchCache = "force-no-store";
 export const dynamic = "force-dynamic";
 
-
 export default async function Home() {
   try {
     const data = await fetchAuctionsWithBids();
     data.sort((a, b) => b.timestamp - a.timestamp);
     const price = await fetchMoxiePrice();
-    
+    const activeFT = await fetchLiveAuctionFT();
+
     return (
       <main className="flex min-h-screen flex-col">
         <div>
           <div className="m-4">
             <Navbar />
           </div>
-          <Hero price={price} initialBids={data as Bid[]} totalBids={data.length} />
+          <Hero price={price} initialBids={data as Bid[]} activeFT={activeFT} totalBids={data.length} />
         </div>
       </main>
     );
