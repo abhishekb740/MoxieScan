@@ -187,7 +187,9 @@ const Hero = ({ price, initialBids, totalBids, activeFT }: HeroProps) => {
         fanTokensAvailable: 42535,
         fanNumberOfBids: 5,
         fanHighestBid: 100,
-        setShowModal: setShowModal
+        setShowModal: setShowModal,
+        currentBid: currentBid,
+        onBidHandler: onBidHandler
     }
 
     const ModalOpenHandler = (bid: Bid) => {
@@ -198,7 +200,8 @@ const Hero = ({ price, initialBids, totalBids, activeFT }: HeroProps) => {
     return (
         <div className="px-4 md:px-20 font-rubik">
             {
-                showModal && <Modal currentBid={currentBid} {...testModalProps} onBidHandler={onBidHandler} />
+                // showModal && <Modal currentBid={currentBid} {...testModalProps} onBidHandler={onBidHandler} />
+                showModal && <Modal {...testModalProps} />
             }
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-black text-white">

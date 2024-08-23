@@ -1,12 +1,18 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState } from "react";
 import Farcaster from "@/icons/Farcaster";
 import Moxie from "@/icons/Moxie";
-import { formatWeiToEther } from "@/utils/helpers";
+import { formatNumber, formatWeiToEther } from "@/utils/helpers";
 
 type SendProps = {
   auctionId: string;
   encodedOrderId: string;
-  onBidHandler: (auctionId: string, encodedOrderId: string, _buyAmount: string, _sellAmount: string) => void;
+  onBidHandler: (
+    auctionId: string,
+    encodedOrderId: string,
+    _buyAmount: string,
+    _sellAmount: string
+  ) => void;
   fanName: string;
   fanImage: string;
   bidAmount: number;
@@ -42,7 +48,7 @@ const Send = ({
   fanNumberOfBids,
   fanHighestBid,
   fanClearingPrice,
-  loading
+  loading,
 }: SendProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -59,7 +65,7 @@ const Send = ({
         bidAmount.toString()
       );
 
-      if (typeof receipt !== 'undefined') {
+      if (typeof receipt !== "undefined") {
         console.log("Transaction successful:", receipt);
         setBid(true);
       }
@@ -86,120 +92,103 @@ const Send = ({
     }
   };
 
-
-
   return (
     <div className="relative p-6 flex-auto flex flex-col items-start justify-start gap-6">
       {/* Fan Details */}
-      <div className="flex items-center justify-start gap-3">
-        <img src={fanImage} className="w-10 h-10 rounded-full" alt="fan" />
-        <p className="text-white">{fanName}</p>
-        <button className="cursor-pointer">
-          <Farcaster />
-        </button>
-      </div>
-      {/* Bid Details */}
-      <div className="flex flex-col items-start justify-start w-full gap-2">
-        <p className="text-white">Price per Fan Token in Moxie {'>'} 1</p>
-        <div className="flex items-start justify-start border border-[#262626] bg-[#171717] rounded-xl w-full">
-          <input
-            type="text"
-            className="bg-[#171717] text-[#737373] px-6 py-3 rounded-xl w-full outline-none"
-            value={pricePerFanToken}
-            onChange={(e) => setPricePerFanToken(e.target.value)}
-            placeholder="0"
-            min={1}
-            defaultValue={1}
-            disabled={isSubmitting}
-          />
-          <div className="px-6 py-3 ">
-            <Moxie />
-          </div>
+      <div className="flex flex-col sm:flex-row gap-4 items-end justify-between w-full">
+        <div className="flex items-center justify-start gap-3">
+          <img src={fanImage} className="w-10 h-10 rounded-full" alt="fan" />
+          <p className="text-white font-bold">{fanName}</p>
+          <button className="cursor-pointer">
+            <Farcaster />
+          </button>
+        </div>
+        <div className="flex flex-col items-end justify-end gap-1">
+          <p className="font-bold text-white text-base flex gap-2 items-center justify-end text-end">
+            {loading ? (
+              <span className="animate-pulse bg-gray-700 rounded-full h-8 w-28 inline-block"></span>
+            ) : (
+              formatNumber(Number(fanMoxieEarned.toFixed(2)))
+            )}{" "}
+            <img src="/moxie.png" className="w-4 h-4" alt="moxie" />
+            <span className="text-[#737373] text-sm">EARNED</span>
+          </p>
+          <p className="text-sm text-[#737373] text-end">
+            <span className="text-[#32D583]">{fanEarningsShared}%</span> of
+            future earning shared with Fans
+          </p>
         </div>
       </div>
-      <div className="flex flex-col items-start justify-start w-full gap-2">
-        <p className="text-white">What&apos;s your Total Budget?</p>
-        <div className="flex items-start justify-start border border-[#262626] bg-[#171717] rounded-xl w-full">
-          <input
-            type="number"
-            className="bg-[#171717] text-[#737373] px-6 py-3 rounded-xl w-full outline-none"
-            value={bidAmount}
-            onChange={(e) => setBidAmount(Number(e.target.value))}
-            placeholder="0"
-            min={0}
-            defaultValue={0}
-            disabled={isSubmitting}
-          />
-          <div className="px-6 py-3 ">
-            <Moxie />
-          </div>
-        </div>
-        <div className="flex items-center justify-between w-full text-[#737373]">
-          <p className="text-sm">Available: {moxieBalance}</p>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setBidAmount(moxieBalance / 2)}
-              className="cursor-pointer text-sm"
-              disabled={isSubmitting}
-            >
-              Half
-            </button>
-            <button
-              onClick={() => setBidAmount(moxieBalance)}
-              className="cursor-pointer text-sm"
-              disabled={isSubmitting}
-            >
-              Max
-            </button>
-          </div>
-        </div>
-      </div>
-      {/* About Fan Token */}
+
+      {/* ABout the token */}
       <div className="flex flex-col gap-4 items-start justify-start w-full">
-        <p className="text-sm">About {fanName}&apos;s fan token</p>
         {/* Moxie value */}
         <div className="w-full flex flex-col items-start justify-start bg-[#0A0A0A] px-6 py-3 rounded-xl">
-          <div className="w-full flex flex-col items-start justify-start gap-2 py-2 border-b border-b-[#262626]">
-            <p className="uppercase text-[#737373] text-sm">
-              moxie earned all time
-            </p>
-            <p className="font-bold text-white text-2xl flex gap-4 items-center justify-center">
-              {loading ? <span className="animate-pulse bg-gray-700 rounded-full h-8 w-28 inline-block"></span> : fanMoxieEarned.toFixed(2)} <Moxie />
-            </p>
-          </div>
-          <div className="w-full flex items-center justify-between gap-4 py-2">
-            <p className="uppercase text-[#737373] text-sm">earnings shared</p>
-            <p className="text-[#32D583] text-sm flex gap-4 items-center justify-center">
-              {fanEarningsShared}%
-            </p>
-          </div>
-        </div>
-        <div className="w-full flex flex-col items-start justify-start bg-[#0A0A0A] px-6 py-3 rounded-xl">
-          <div className="w-full flex flex-col items-start justify-start gap-2 py-2 border-b border-b-[#262626]">
+          <div className="w-full flex items-center justify-between gap-4 py-2 font-bold">
             <p className="uppercase text-[#737373] text-sm">
               fan tokens available
             </p>
-            <p className="font-bold text-white text-2xl flex gap-4 items-center justify-center">
-              {loading ? <span className="animate-pulse bg-gray-700 rounded-full h-8 w-20 inline-block"></span> : formatWeiToEther(fanTokensAvailable)}
-            </p>
-          </div>
-          <div className="w-full flex items-center justify-between gap-4 py-2 font-bold">
-            <p className="uppercase text-[#737373] text-sm">Number of bids</p>
             <p className="text-white text-sm flex gap-4 items-center justify-center">
-              {loading ? <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span> : fanNumberOfBids}
+              {loading ? (
+                <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span>
+              ) : (
+                formatWeiToEther(fanTokensAvailable)
+              )}
             </p>
           </div>
           <div className="w-full flex items-center justify-between gap-4 py-2 font-bold">
             <p className="uppercase text-[#737373] text-sm">Highest Bid</p>
             <p className="text-white text-sm flex gap-4 items-center justify-center">
-              {loading ? <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span> : fanHighestBid}
+              {loading ? (
+                <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span>
+              ) : (
+                fanHighestBid
+              )}
             </p>
           </div>
-          <div className="w-full flex items-center justify-between gap-4 py-2 font-bold">
-            <p className="uppercase text-[#737373] text-sm">Clearing Price</p>
-            <p className="text-white text-sm flex gap-4 items-center justify-center">
-              {loading ? <span className="animate-pulse bg-gray-700 rounded h-4 w-12 inline-block"></span> : fanClearingPrice.toFixed(2)}
+        </div>
+      </div>
+
+      {/* Bid Details */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+        <div className="flex flex-col items-start justify-start w-full gap-2">
+          <p className="text-white">Price per token(Bid)</p>
+          <div className="flex items-start justify-start border border-[#262626] bg-[#171717] rounded-xl w-full">
+            <input
+              type="number"
+              className="bg-[#171717] text-[#737373] px-6 py-3 rounded-xl w-full outline-none"
+              value={bidAmount}
+              onChange={(e) => setBidAmount(Number(e.target.value))}
+              placeholder="0"
+              min={0}
+              defaultValue={0}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="flex items-center justify-between w-full text-[#737373]">
+            <p className="text-sm">
+              Note: It should be greater than{" "}
+              <span className="font-bold">1 MOXIE</span>
             </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start justify-start w-full gap-2">
+          <p className="text-white">What&apos;s your Total Budget?</p>
+          <div className="flex items-start justify-start border border-[#262626] bg-[#171717] rounded-xl w-full">
+            <input
+              type="number"
+              className="bg-[#171717] text-[#737373] px-6 py-3 rounded-xl w-full outline-none"
+              value={bidAmount}
+              onChange={(e) => setBidAmount(Number(e.target.value))}
+              placeholder="0"
+              min={0}
+              defaultValue={0}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="flex items-center justify-between w-full text-[#737373]">
+            <p className="text-sm">Available: {moxieBalance}</p>
           </div>
         </div>
       </div>
@@ -212,8 +201,9 @@ const Send = ({
 
       <button
         onClick={bidHandler}
-        className={`w-full py-3 rounded-full text-white ${isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-[#8658F6]"
-          }`}
+        className={`w-full py-3 rounded-full text-white ${
+          isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-[#8658F6]"
+        }`}
         disabled={isSubmitting}
       >
         {isSubmitting ? "Submitting..." : "Bid"}
