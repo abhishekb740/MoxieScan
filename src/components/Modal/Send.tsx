@@ -157,8 +157,8 @@ const Send = ({
             <input
               type="number"
               className="bg-[#171717] text-[#737373] px-6 py-3 rounded-xl w-full outline-none"
-              value={bidAmount}
-              onChange={(e) => setBidAmount(Number(e.target.value))}
+              value={pricePerFanToken}
+              onChange={(e) => setPricePerFanToken(e.target.value)}
               placeholder="0"
               min={0}
               defaultValue={0}
@@ -201,9 +201,8 @@ const Send = ({
 
       <button
         onClick={bidHandler}
-        className={`w-full py-3 rounded-full text-white ${
-          isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-[#8658F6]"
-        }`}
+        className={`w-full py-3 rounded-full text-white ${isSubmitting ? "bg-gray-500 cursor-not-allowed" : "bg-[#8658F6]"
+          }`}
         disabled={isSubmitting}
       >
         {isSubmitting ? "Submitting..." : "Bid"}
